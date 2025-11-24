@@ -1,8 +1,10 @@
 local scoreboardOpen = false
 
+-- Command to toggle scoreboard
 RegisterCommand("togglescoreboard", function()
     scoreboardOpen = not scoreboardOpen
-    SetNuiFocus(scoreboardOpen, scoreboardOpen)
+    SetNuiFocus(false, false) -- no cursor needed, just show/hide
+
     SendNUIMessage({
         action = "toggle",
         show = scoreboardOpen
@@ -13,8 +15,28 @@ RegisterCommand("togglescoreboard", function()
     end
 end)
 
-RegisterKeyMapping("togglescoreboard", "Toggle Scoreboard", "keyboard", "F9")
+-- Keymapping using the key from config
+CreateThread(function()
+    -- small delay to ensure Config is loaded
+    Wait(500)
 
+    -- Register keybind with name "togglescoreboard"
+    RegisterKeyMapping(
+        "togglescoreboard",
+        "Toggle Scoreboard",
+        "keyboard",
+        Config.ToggleKey or "F9"
+    )
+
+    -- Send initial config data to NUI
+    SendNUIMessage({
+        action = "config",
+        serverName = Config.ServerName or "My Server",
+        logo = Config.LogoURL or ""
+    })
+end)
+
+-- Function to gather all active players
 function updateScoreboard()
     local players = GetActivePlayers()
     local data = {}
@@ -37,7 +59,7 @@ function updateScoreboard()
     })
 end
 
--- refresh every second
+-- Refresh data every second while scoreboard is open
 CreateThread(function()
     while true do
         Wait(1000)

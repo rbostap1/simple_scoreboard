@@ -9,4 +9,7 @@ files {
     'html/script.js'
 }
 
-client_script 'client.lua'
+client_scripts {
+    'config.lua',
+    'client.lua'
+}
