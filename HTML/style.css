@@ -1,0 +1,36 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+#scoreboard {
+    display: none;
+    width: 350px;
+    background: rgba(0, 0, 0, 0.75);
+    border-radius: 10px;
+    padding: 15px;
+    color: #fff;
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 6px;
+    text-align: left;
+    border-bottom: 1px solid #555;
+}
+
+th {
+    font-size: 18px;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
