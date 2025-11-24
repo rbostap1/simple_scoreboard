@@ -1,9 +1,13 @@
+-- client.lua
+
 local scoreboardOpen = false
 
--- Command to toggle scoreboard
+-- Toggle command
 RegisterCommand("togglescoreboard", function()
     scoreboardOpen = not scoreboardOpen
-    SetNuiFocus(false, false) -- no cursor needed, just show/hide
+
+    -- We don't need NUI focus (no mouse interaction), just show/hide
+    SetNuiFocus(false, false)
 
     SendNUIMessage({
         action = "toggle",
@@ -11,16 +15,14 @@ RegisterCommand("togglescoreboard", function()
     })
 
     if scoreboardOpen then
-        updateScoreboard()
+        requestScoreboardUpdate()
     end
 end)
 
--- Keymapping using the key from config
+-- Register key mapping from config
 CreateThread(function()
-    -- small delay to ensure Config is loaded
-    Wait(500)
+    Wait(500) -- small delay to ensure Config is loaded
 
-    -- Register keybind with name "togglescoreboard"
     RegisterKeyMapping(
         "togglescoreboard",
         "Toggle Scoreboard",
@@ -28,7 +30,7 @@ CreateThread(function()
         Config.ToggleKey or "F9"
     )
 
-    -- Send initial config data to NUI
+    -- Send config data (server name + logo) to NUI once
     SendNUIMessage({
         action = "config",
         serverName = Config.ServerName or "My Server",
@@ -36,35 +38,25 @@ CreateThread(function()
     })
 end)
 
--- Function to gather all active players
-function updateScoreboard()
-    local players = GetActivePlayers()
-    local data = {}
-
-    for _, player in ipairs(players) do
-        local serverId = GetPlayerServerId(player)
-        local name = GetPlayerName(player)
-        local ping = GetPlayerPing(player)
-
-        table.insert(data, {
-            id = serverId,
-            name = name,
-            ping = ping
-        })
-    end
-
-    SendNUIMessage({
-        action = "update",
-        players = data
-    })
+-- Ask the server for the current player list
+function requestScoreboardUpdate()
+    TriggerServerEvent("simple_scoreboard:requestPlayers")
 end
 
--- Refresh data every second while scoreboard is open
+-- Receive player list from server and pass it to NUI
+RegisterNetEvent("simple_scoreboard:updatePlayers", function(players)
+    SendNUIMessage({
+        action = "update",
+        players = players
+    })
+end)
+
+-- Refresh every second while open
 CreateThread(function()
     while true do
         Wait(1000)
         if scoreboardOpen then
-            updateScoreboard()
+            requestScoreboardUpdate()
         end
     end
 end)
