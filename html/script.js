@@ -3,15 +3,7 @@ window.addEventListener("message", function (event) {
 
     if (data.action === "toggle") {
         const sb = document.getElementById("scoreboard");
-        if (data.show) {
-            sb.style.display = "block";
-            // Trigger animation after display is set
-            setTimeout(() => sb.classList.add("show"), 10);
-        } else {
-            sb.classList.remove("show");
-            // Hide after animation completes
-            setTimeout(() => sb.style.display = "none", 300);
-        }
+        sb.style.display = data.show ? "block" : "none";
     }
 
     if (data.action === "config") {
@@ -32,19 +24,12 @@ window.addEventListener("message", function (event) {
 
     if (data.action === "update") {
         const list = document.getElementById("playerlist");
-        const playerCount = document.getElementById("player-count");
-        
         list.innerHTML = "";
 
         if (!Array.isArray(data.players)) return;
 
-        // Update player count
-        const count = data.players.length;
-        playerCount.textContent = `${count} Player${count !== 1 ? 's' : ''} Online`;
-
-        data.players.forEach((player, index) => {
+        data.players.forEach(player => {
             const row = document.createElement("tr");
-            row.style.animationDelay = `${index * 0.03}s`;
 
             row.innerHTML = `
                 <td>${player.id}</td>

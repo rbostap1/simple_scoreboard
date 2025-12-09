@@ -3,37 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="scoreboard">
-        <div class="scoreboard-glow"></div>
-        <div class="scoreboard-content">
-            <div id="header">
-                <div class="header-content">
-                    <img id="logo" src="" alt="Logo" style="display:none;">
-                    <div class="header-text">
-                        <div id="servername">Server Name</div>
-                        <div id="player-count">0 Players Online</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th><span class="th-content">ID</span></th>
-                            <th><span class="th-content">Name</span></th>
-                        </tr>
-                    </thead>
-                    <tbody id="playerlist">
-                    </tbody>
-                </table>
-            </div>
+        <div id="header">
+            <img id="logo" src="" alt="Logo" style="display:none;">
+            <div id="servername">Server Name</div>
         </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody id="playerlist">
+            </tbody>
+        </table>
     </div>
 
     <script src="script.js"></script>
