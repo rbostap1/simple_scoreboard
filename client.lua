@@ -2,20 +2,32 @@
 
 local scoreboardOpen = false
 
--- Toggle command (players can bind/change in keybinds menu)
-RegisterCommand("togglescoreboard", function()
-    scoreboardOpen = not scoreboardOpen
+-- Open command (triggered on key/button press)
+RegisterCommand("+showscoreboard", function()
+    if not scoreboardOpen then
+        scoreboardOpen = true
 
-    -- No mouse needed, just display
-    SetNuiFocus(false, false)
+        -- No mouse needed, just display
+        SetNuiFocus(false, false)
 
-    SendNUIMessage({
-        action = "toggle",
-        show = scoreboardOpen
-    })
+        SendNUIMessage({
+            action = "toggle",
+            show = true
+        })
 
-    if scoreboardOpen then
         updateScoreboard()
+    end
+end)
+
+-- Close command (triggered on key/button release)
+RegisterCommand("-showscoreboard", function()
+    if scoreboardOpen then
+        scoreboardOpen = false
+
+        SendNUIMessage({
+            action = "toggle",
+            show = false
+        })
     end
 end)
 
@@ -23,11 +35,20 @@ end)
 CreateThread(function()
     Wait(500) -- small delay to ensure Config is loaded
 
+    -- Keyboard binding
     RegisterKeyMapping(
-        "togglescoreboard",
-        "Toggle Scoreboard",
+        "+showscoreboard",
+        "Show Scoreboard",
         "keyboard",
         Config.ToggleKey or "F9"
+    )
+
+    -- Controller binding (DPAD UP)
+    RegisterKeyMapping(
+        "+showscoreboard",
+        "Show Scoreboard",
+        "PAD_DIGITALBUTTON",
+        "DPAD_UP"
     )
 
     -- Send config data (server name + logo) to NUI once
