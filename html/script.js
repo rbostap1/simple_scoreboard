@@ -1,9 +1,9 @@
-window.addEventListener("message", function(event) {
+window.addEventListener("message", function (event) {
     const data = event.data;
 
     if (data.action === "toggle") {
-        document.getElementById("scoreboard").style.display =
-            data.show ? "block" : "none";
+        const sb = document.getElementById("scoreboard");
+        sb.style.display = data.show ? "block" : "none";
     }
 
     if (data.action === "config") {
@@ -26,13 +26,14 @@ window.addEventListener("message", function(event) {
         const list = document.getElementById("playerlist");
         list.innerHTML = "";
 
+        if (!Array.isArray(data.players)) return;
+
         data.players.forEach(player => {
             const row = document.createElement("tr");
 
             row.innerHTML = `
                 <td>${player.id}</td>
                 <td>${player.name}</td>
-                <td>${player.ping}</td>
             `;
 
             list.appendChild(row);

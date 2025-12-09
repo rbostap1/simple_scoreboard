@@ -2,11 +2,11 @@
 
 local scoreboardOpen = false
 
--- Toggle command
+-- Toggle command (players can bind/change in keybinds menu)
 RegisterCommand("togglescoreboard", function()
     scoreboardOpen = not scoreboardOpen
 
-    -- We don't need NUI focus (no mouse interaction), just show/hide
+    -- No mouse needed, just display
     SetNuiFocus(false, false)
 
     SendNUIMessage({
@@ -15,11 +15,11 @@ RegisterCommand("togglescoreboard", function()
     })
 
     if scoreboardOpen then
-        requestScoreboardUpdate()
+        updateScoreboard()
     end
 end)
 
--- Register key mapping from config
+-- Register keymapping using the key from config
 CreateThread(function()
     Wait(500) -- small delay to ensure Config is loaded
 
@@ -38,25 +38,40 @@ CreateThread(function()
     })
 end)
 
--- Ask the server for the current player list
-function requestScoreboardUpdate()
-    TriggerServerEvent("simple_scoreboard:requestPlayers")
-end
+-- Build the player list (ID + Name only)
+function updateScoreboard()
+    local players = {}
 
--- Receive player list from server and pass it to NUI
-RegisterNetEvent("simple_scoreboard:updatePlayers", function(players)
+    -- Always include the local player first
+    local myPlayer = PlayerId()
+    table.insert(players, {
+        id = GetPlayerServerId(myPlayer),
+        name = GetPlayerName(myPlayer)
+    })
+
+    -- Add any other active/streamed players
+    for _, player in ipairs(GetActivePlayers()) do
+        if player ~= myPlayer then
+            table.insert(players, {
+                id = GetPlayerServerId(player),
+                name = GetPlayerName(player)
+            })
+        end
+    end
+
+    -- Send list to NUI
     SendNUIMessage({
         action = "update",
         players = players
     })
-end)
+end
 
--- Refresh every second while open
+-- Refresh every second while scoreboard is open
 CreateThread(function()
     while true do
         Wait(1000)
         if scoreboardOpen then
-            requestScoreboardUpdate()
+            updateScoreboard()
         end
     end
 end)
