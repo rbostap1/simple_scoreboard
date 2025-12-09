@@ -7,8 +7,11 @@
 <body>
     <div id="scoreboard">
         <div id="header">
-            <img id="logo" src="" alt="Logo" style="display:none;">
-            <div id="servername">Server Name</div>
+            <div>
+                <img id="logo" src="" alt="Logo" style="display:none;">
+                <div id="servername">Server Name</div>
+            </div>
+            <div id="playercount">0 / 32</div>
         </div>
 
         <table>
@@ -21,6 +24,12 @@
             <tbody id="playerlist">
             </tbody>
         </table>
+
+        <div id="pagination">
+            <button id="prevPage" class="page-btn">← Previous</button>
+            <span id="pageIndicator">Page 1</span>
+            <button id="nextPage" class="page-btn">Next →</button>
+        </div>
     </div>
 
     <script src="script.js"></script>

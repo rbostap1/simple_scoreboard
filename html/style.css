@@ -43,6 +43,7 @@ body {
 #header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding-bottom: 16px;
     margin-bottom: 16px;
     position: relative;
@@ -52,6 +53,23 @@ body {
     background: linear-gradient(90deg, transparent, rgba(100, 150, 255, 0.4), transparent) bottom;
     background-size: 100% 2px;
     background-repeat: no-repeat;
+}
+
+#header > div:first-child {
+    display: flex;
+    align-items: center;
+}
+
+/* Player count display */
+#playercount {
+    font-size: 13px;
+    font-weight: 600;
+    color: #a0b5ff;
+    background: rgba(100, 150, 255, 0.15);
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(100, 150, 255, 0.3);
+    white-space: nowrap;
 }
 
 #logo {
@@ -136,6 +154,55 @@ td:first-child {
 
 td:last-child {
     border-radius: 0 8px 8px 0;
+}
+
+/* Pagination controls */
+#pagination {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 2px solid transparent;
+    background: linear-gradient(90deg, transparent, rgba(100, 150, 255, 0.4), transparent) top;
+    background-size: 100% 2px;
+    background-repeat: no-repeat;
+}
+
+#pageIndicator {
+    font-size: 13px;
+    font-weight: 600;
+    color: #a0b5ff;
+    min-width: 80px;
+    text-align: center;
+}
+
+.page-btn {
+    background: linear-gradient(135deg, rgba(100, 150, 255, 0.25), rgba(80, 120, 200, 0.15));
+    border: 1px solid rgba(100, 150, 255, 0.4);
+    color: #b8c5ff;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(100, 150, 255, 0.4), rgba(80, 120, 200, 0.3));
+    border-color: rgba(100, 150, 255, 0.6);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(100, 150, 255, 0.2);
+}
+
+.page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 /* Scrollbar styling for player list */
