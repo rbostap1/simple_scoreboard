@@ -24,12 +24,6 @@ body {
     padding: 20px 24px 18px 24px;
     color: #ffffff;
 
-    /* Enhanced shadow with glow */
-    box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.6),
-        0 0 60px rgba(100, 150, 255, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    
     /* Smooth fade-in animation */
     animation: fadeInScale 0.3s ease-out;
 }
