@@ -1,3 +1,7 @@
+-----------------------------------
+--       SIMPLE SCOREBOARD       --
+-----------------------------------
+
 Config = {}
 
 -- 🏷 Your server name (shown at top of scoreboard)
