@@ -1,5 +1,12 @@
 # simple_scoreboard
-A simple score board for FiveM (vMenu)
+This is a simple scoreboard for a FiveM server (vMenu). This script is a standalone FiveM sscipt. 
+
+## Configure Scoreboard
+- Inside `config.lua`, replace "YOUR SERVER NAME HERE" with your server name.
+- Inside `config.lua`, replace "https://example.com/yourlogo.png" with your logo.
+
+## Server Lua
+The `server.lua` file is not neded, but included if you want to use it. By defualt is is commented out in the `fxmaifest.lua` file.
 
 # Script Credits
 Script creator: Ryan Bostaph
