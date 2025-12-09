@@ -1,5 +1,6 @@
 let currentPage = 1;
 let allPlayers = [];
+let maxPlayers = 32;
 const playersPerPage = 12;
 
 function renderPlayerPage() {
@@ -68,6 +69,11 @@ window.addEventListener("message", function (event) {
         } else {
             logoEl.style.display = "none";
         }
+
+        // Store max players from config
+        if (data.maxPlayers) {
+            maxPlayers = data.maxPlayers;
+        }
     }
 
     if (data.action === "update") {
@@ -77,8 +83,8 @@ window.addEventListener("message", function (event) {
         currentPage = 1; // Reset to first page
         renderPlayerPage();
 
-        // Update player count (show current/32 format)
+        // Update player count dynamically with configured max players
         const playerCount = document.getElementById("playercount");
-        playerCount.textContent = `${allPlayers.length} / 32`;
+        playerCount.textContent = `${allPlayers.length} / ${maxPlayers}`;
     }
 });

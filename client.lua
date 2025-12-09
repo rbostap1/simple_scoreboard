@@ -51,11 +51,12 @@ CreateThread(function()
         "DPAD_UP"
     )
 
-    -- Send config data (server name + logo) to NUI once
+    -- Send config data (server name + logo + max players) to NUI once
     SendNUIMessage({
         action = "config",
         serverName = Config.ServerName or "My Server",
-        logo = Config.LogoURL or ""
+        logo = Config.LogoURL or "",
+        maxPlayers = Config.MaxPlayers or 32
     })
 end)
 
