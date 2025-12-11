@@ -171,15 +171,13 @@ tbody tr:hover {
 }
 
 tbody tr.current-player {
-    background: linear-gradient(90deg, var(--primary) 0%, var(--primary) 100%);
-    background-color: var(--primary);
-    opacity: 0.25;
-    border: 1px solid var(--primary);
+    background: linear-gradient(90deg, rgb(var(--primary-rgb, 100 150 255) / 0.25), rgb(var(--primary-rgb, 100 150 255) / 0.25));
+    border: 1px solid rgb(var(--primary-rgb, 100 150 255) / 0.6);
     border-radius: 8px;
 }
 
 tbody tr.current-player:hover {
-    opacity: 0.4;
+    background: linear-gradient(90deg, rgb(var(--primary-rgb, 100 150 255) / 0.4), rgb(var(--primary-rgb, 100 150 255) / 0.4));
 }
 
 tbody tr.current-player td {
