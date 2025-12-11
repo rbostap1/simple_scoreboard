@@ -8,6 +8,16 @@ let logoEnabled = true;
 let colors = {};
 const playersPerPage = 12;
 
+// Convert hex color to RGB values
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
 function renderPlayerPage() {
     const list = document.getElementById("playerlist");
     list.innerHTML = "";
@@ -106,36 +116,55 @@ window.addEventListener("message", function (event) {
             highlightColor = data.highlightColor;
             // Apply highlight color as CSS variable
             root.style.setProperty("--highlight-color", highlightColor);
+            // Convert and set RGB values
+            const rgb = hexToRgb(highlightColor);
+            if (rgb) {
+                root.style.setProperty("--highlight-color-rgb", `${rgb.r} ${rgb.g} ${rgb.b}`);
+            }
         }
         
         // Store and apply colors from config
         if (data.colors && Object.keys(data.colors).length > 0) {
             colors = data.colors;
             
+            // Helper function to set color and RGB variables
+            const setColorVar = (varName, colorValue, defaultValue) => {
+                const color = colorValue || defaultValue;
+                root.style.setProperty(`--${varName}`, color);
+                const rgb = hexToRgb(color);
+                if (rgb) {
+                    root.style.setProperty(`--${varName}-rgb`, `${rgb.r} ${rgb.g} ${rgb.b}`);
+                }
+            };
+            
             // Apply colors as CSS variables
-            root.style.setProperty("--primary", colors.primary || "#6495FF");
-            root.style.setProperty("--primary-dark", colors.primaryDark || "#4A6FA5");
-            root.style.setProperty("--text-white", colors.textWhite || "#FFFFFF");
-            root.style.setProperty("--text-accent", colors.textAccent || "#A0B5FF");
-            root.style.setProperty("--background", `rgba(20, 20, 40, ${colors.background ? colors.background.replace(/[^\d.]/g, '') : 0.92})`);
-            root.style.setProperty("--background-dark", `rgba(10, 10, 25, ${colors.backgroundDark ? colors.backgroundDark.replace(/[^\d.]/g, '') : 0.95})`);
-            root.style.setProperty("--border", colors.border || "#FFFFFF");
-            root.style.setProperty("--border-opacity", colors.borderOpacity || 0.1);
-            root.style.setProperty("--header-border", colors.headerBorder || "#6495FF");
-            root.style.setProperty("--header-border-opacity", colors.headerBorderOpacity || 0.4);
-            root.style.setProperty("--player-row", colors.playerRow || "#FFFFFF");
-            root.style.setProperty("--player-row-light-opacity", colors.playerRowLightOpacity || 0.03);
-            root.style.setProperty("--player-row-dark-opacity", colors.playerRowDarkOpacity || 0.05);
-            root.style.setProperty("--player-count-bg", colors.playerCountBg || "#6495FF");
-            root.style.setProperty("--player-count-bg-opacity", colors.playerCountBgOpacity || 0.15);
-            root.style.setProperty("--player-count-border", colors.playerCountBorder || "#6495FF");
-            root.style.setProperty("--player-count-border-opacity", colors.playerCountBorderOpacity || 0.3);
-            root.style.setProperty("--hover-bg", colors.hoverBg || "#6495FF");
-            root.style.setProperty("--hover-bg-opacity", colors.hoverBgOpacity || 0.15);
-            root.style.setProperty("--hover-bg-dark", colors.hoverBgDark || "#5078C8");
-            root.style.setProperty("--hover-bg-dark-opacity", colors.hoverBgDarkOpacity || 0.15);
-            root.style.setProperty("--logo-glow", colors.logoGlow || "#6495FF");
-            root.style.setProperty("--logo-glow-opacity", colors.logoGlowOpacity || 0.3);
+            setColorVar("primary", colors.primary, "#6495FF");
+            setColorVar("primary-dark", colors.primaryDark, "#4A6FA5");
+            setColorVar("text-white", colors.textWhite, "#FFFFFF");
+            setColorVar("text-accent", colors.textAccent, "#A0B5FF");
+            setColorVar("border", colors.border, "#FFFFFF");
+            setColorVar("header-border", colors.headerBorder, "#6495FF");
+            setColorVar("player-row", colors.playerRow, "#FFFFFF");
+            setColorVar("player-count-bg", colors.playerCountBg, "#6495FF");
+            setColorVar("player-count-border", colors.playerCountBorder, "#6495FF");
+            setColorVar("hover-bg", colors.hoverBg, "#6495FF");
+            setColorVar("hover-bg-dark", colors.hoverBgDark, "#5078C8");
+            setColorVar("logo-glow", colors.logoGlow, "#6495FF");
+            
+            // Handle background colors separately (they include opacity in the value)
+            root.style.setProperty("--background", colors.background || "rgba(20, 20, 40, 0.92)");
+            root.style.setProperty("--background-dark", colors.backgroundDark || "rgba(10, 10, 25, 0.95)");
+            
+            // Set opacity values
+            root.style.setProperty("--border-opacity", colors.borderOpacity ?? 0.1);
+            root.style.setProperty("--header-border-opacity", colors.headerBorderOpacity ?? 0.4);
+            root.style.setProperty("--player-row-light-opacity", colors.playerRowLightOpacity ?? 0.03);
+            root.style.setProperty("--player-row-dark-opacity", colors.playerRowDarkOpacity ?? 0.05);
+            root.style.setProperty("--player-count-bg-opacity", colors.playerCountBgOpacity ?? 0.15);
+            root.style.setProperty("--player-count-border-opacity", colors.playerCountBorderOpacity ?? 0.3);
+            root.style.setProperty("--hover-bg-opacity", colors.hoverBgOpacity ?? 0.15);
+            root.style.setProperty("--hover-bg-dark-opacity", colors.hoverBgDarkOpacity ?? 0.15);
+            root.style.setProperty("--logo-glow-opacity", colors.logoGlowOpacity ?? 0.3);
             root.style.setProperty("--logo-glow-size", colors.logoGlowSize || "20px");
         }
     }
