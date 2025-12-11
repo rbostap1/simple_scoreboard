@@ -51,12 +51,16 @@ CreateThread(function()
         "DPAD_UP"
     )
 
-    -- Send config data (server name + logo + max players) to NUI once
+    -- Send config data (server name + logo + max players + highlight settings + colors) to NUI once
     SendNUIMessage({
         action = "config",
         serverName = Config.ServerName or "My Server",
-        logo = Config.LogoURL or "",
-        maxPlayers = Config.MaxPlayers or 32
+        logoEnabled = Config.EnableLogo ~= false,
+        logo = (Config.EnableLogo ~= false and Config.LogoURL) or "",
+        maxPlayers = Config.MaxPlayers or 32,
+        highlightEnabled = Config.HighlightCurrentPlayer ~= false,
+        highlightColor = Config.HighlightColor or "#6495FF",
+        colors = Config.Colors or {}
     })
 end)
 
@@ -66,8 +70,9 @@ function updateScoreboard()
 
     -- Always include the local player first
     local myPlayer = PlayerId()
+    local myPlayerId = GetPlayerServerId(myPlayer)
     table.insert(players, {
-        id = GetPlayerServerId(myPlayer),
+        id = myPlayerId,
         name = GetPlayerName(myPlayer)
     })
 
@@ -84,7 +89,8 @@ function updateScoreboard()
     -- Send list to NUI
     SendNUIMessage({
         action = "update",
-        players = players
+        players = players,
+        currentPlayerId = myPlayerId
     })
 end
 

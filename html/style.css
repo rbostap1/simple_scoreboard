@@ -5,6 +5,34 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+:root {
+    /* Default color variables */
+    --primary: #6495FF;
+    --primary-dark: #4A6FA5;
+    --text-white: #FFFFFF;
+    --text-accent: #A0B5FF;
+    --background: rgba(20, 20, 40, 0.92);
+    --background-dark: rgba(10, 10, 25, 0.95);
+    --border: #FFFFFF;
+    --border-opacity: 0.1;
+    --header-border: #6495FF;
+    --header-border-opacity: 0.4;
+    --player-row: #FFFFFF;
+    --player-row-light-opacity: 0.03;
+    --player-row-dark-opacity: 0.05;
+    --player-count-bg: #6495FF;
+    --player-count-bg-opacity: 0.15;
+    --player-count-border: #6495FF;
+    --player-count-border-opacity: 0.3;
+    --hover-bg: #6495FF;
+    --hover-bg-opacity: 0.15;
+    --hover-bg-dark: #5078C8;
+    --hover-bg-dark-opacity: 0.15;
+    --logo-glow: #6495FF;
+    --logo-glow-opacity: 0.3;
+    --logo-glow-size: 20px;
+}
+
 /* Scoreboard container - Glassmorphism style */
 #scoreboard {
     display: none; /* hidden by default */
@@ -15,14 +43,14 @@ body {
     width: 420px;
 
     /* Glassmorphism effect */
-    background: linear-gradient(135deg, rgba(20, 20, 40, 0.92) 0%, rgba(10, 10, 25, 0.95) 100%);
+    background: linear-gradient(135deg, var(--background) 0%, var(--background-dark) 100%);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgb(var(--border-opacity-rgb, 255 255 255) / var(--border-opacity));
     padding: 20px 24px 18px 24px;
-    color: #ffffff;
+    color: var(--text-white);
 
     /* Smooth fade-in animation */
     animation: fadeInScale 0.3s ease-out;
@@ -50,7 +78,7 @@ body {
     
     /* Gradient border bottom */
     border-bottom: 2px solid transparent;
-    background: linear-gradient(90deg, transparent, rgba(100, 150, 255, 0.4), transparent) bottom;
+    background: linear-gradient(90deg, transparent, rgb(var(--header-border-rgb, 100 150 255) / var(--header-border-opacity)), transparent) bottom;
     background-size: 100% 2px;
     background-repeat: no-repeat;
 }
@@ -64,11 +92,11 @@ body {
 #playercount {
     font-size: 13px;
     font-weight: 600;
-    color: #a0b5ff;
-    background: rgba(100, 150, 255, 0.15);
+    color: var(--player-count-bg);
+    background: rgb(var(--player-count-bg-rgb, 100 150 255) / var(--player-count-bg-opacity));
     padding: 6px 12px;
     border-radius: 8px;
-    border: 1px solid rgba(100, 150, 255, 0.3);
+    border: 1px solid rgb(var(--player-count-border-rgb, 100 150 255) / var(--player-count-border-opacity));
     white-space: nowrap;
 }
 
@@ -81,19 +109,23 @@ body {
     display: none; /* hidden if no logo provided */
     
     /* Subtle glow effect on logo */
-    box-shadow: 0 0 20px rgba(100, 150, 255, 0.3);
-    border: 2px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 var(--logo-glow-size) rgb(var(--logo-glow-rgb, 100 150 255) / var(--logo-glow-opacity));
+    border: 2px solid rgb(255 255 255 / 0.15);
+}
+
+#header > div:first-child.no-logo #logo {
+    margin-right: 0;
 }
 
 #servername {
     font-size: 22px;
     font-weight: 700;
     letter-spacing: 0.8px;
-    background: linear-gradient(135deg, #ffffff 0%, #b8c5ff 100%);
+    background: linear-gradient(135deg, var(--text-white) 0%, var(--text-accent) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 2px 10px rgba(100, 150, 255, 0.3);
+    text-shadow: 0 2px 10px rgb(var(--primary-rgb, 100 150 255) / 0.3);
 }
 
 /* Table styling */
@@ -104,7 +136,7 @@ table {
 }
 
 thead tr {
-    background: linear-gradient(90deg, rgba(100, 150, 255, 0.15), rgba(80, 120, 200, 0.15));
+    background: linear-gradient(90deg, rgb(var(--hover-bg-rgb, 100 150 255) / var(--hover-bg-opacity)), rgb(var(--hover-bg-dark-rgb, 80 120 200) / var(--hover-bg-dark-opacity)));
     border-radius: 10px;
 }
 
@@ -115,7 +147,7 @@ th {
     text-align: left;
     text-transform: uppercase;
     letter-spacing: 1.2px;
-    color: #a0b5ff;
+    color: var(--text-accent);
     border: none;
 }
 
@@ -128,14 +160,35 @@ th:last-child {
 }
 
 tbody tr {
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.05));
+    background: linear-gradient(90deg, rgb(var(--player-row-rgb, 255 255 255) / var(--player-row-light-opacity)), rgb(var(--player-row-rgb, 255 255 255) / var(--player-row-dark-opacity)));
     border-radius: 8px;
     transition: all 0.2s ease;
 }
 
 tbody tr:hover {
-    background: linear-gradient(90deg, rgba(100, 150, 255, 0.15), rgba(80, 120, 200, 0.15));
+    background: linear-gradient(90deg, rgb(var(--hover-bg-rgb, 100 150 255) / var(--hover-bg-opacity)), rgb(var(--hover-bg-dark-rgb, 80 120 200) / var(--hover-bg-dark-opacity)));
     transform: translateX(3px);
+}
+
+tbody tr.current-player {
+    background: linear-gradient(90deg, var(--primary) 0%, var(--primary) 100%);
+    background-color: var(--primary);
+    opacity: 0.25;
+    border: 1px solid var(--primary);
+    border-radius: 8px;
+}
+
+tbody tr.current-player:hover {
+    opacity: 0.4;
+}
+
+tbody tr.current-player td {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+tbody tr.current-player td:first-child {
+    color: var(--primary);
 }
 
 td {
@@ -149,7 +202,7 @@ td {
 td:first-child {
     border-radius: 8px 0 0 8px;
     font-weight: 600;
-    color: #a0b5ff;
+    color: var(--text-accent);
 }
 
 td:last-child {
@@ -165,7 +218,7 @@ td:last-child {
     margin-top: 16px;
     padding-top: 16px;
     border-top: 2px solid transparent;
-    background: linear-gradient(90deg, transparent, rgba(100, 150, 255, 0.4), transparent) top;
+    background: linear-gradient(90deg, transparent, rgb(var(--primary-rgb, 100 150 255) / var(--header-border-opacity)), transparent) top;
     background-size: 100% 2px;
     background-repeat: no-repeat;
 }
@@ -173,15 +226,15 @@ td:last-child {
 #pageIndicator {
     font-size: 13px;
     font-weight: 600;
-    color: #a0b5ff;
+    color: var(--text-accent);
     min-width: 80px;
     text-align: center;
 }
 
 .page-btn {
-    background: linear-gradient(135deg, rgba(100, 150, 255, 0.25), rgba(80, 120, 200, 0.15));
-    border: 1px solid rgba(100, 150, 255, 0.4);
-    color: #b8c5ff;
+    background: linear-gradient(135deg, rgb(var(--primary-rgb, 100 150 255) / 0.25), rgb(var(--primary-dark-rgb, 80 120 200) / 0.15));
+    border: 1px solid rgb(var(--primary-rgb, 100 150 255) / 0.4);
+    color: var(--text-accent);
     padding: 7px 14px;
     border-radius: 8px;
     font-size: 12px;
@@ -193,11 +246,11 @@ td:last-child {
 }
 
 .page-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, rgba(100, 150, 255, 0.4), rgba(80, 120, 200, 0.3));
-    border-color: rgba(100, 150, 255, 0.6);
-    color: #ffffff;
+    background: linear-gradient(135deg, rgb(var(--primary-rgb, 100 150 255) / 0.4), rgb(var(--primary-dark-rgb, 80 120 200) / 0.3));
+    border-color: rgb(var(--primary-rgb, 100 150 255) / 0.6);
+    color: var(--text-white);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(100, 150, 255, 0.2);
+    box-shadow: 0 4px 12px rgb(var(--primary-rgb, 100 150 255) / 0.2);
 }
 
 .page-btn:disabled {
@@ -211,15 +264,15 @@ td:last-child {
 }
 
 #scoreboard::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgb(255 255 255 / 0.05);
     border-radius: 10px;
 }
 
 #scoreboard::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(100, 150, 255, 0.5), rgba(80, 120, 200, 0.5));
+    background: linear-gradient(180deg, rgb(var(--primary-rgb, 100 150 255) / 0.5), rgb(var(--primary-dark-rgb, 80 120 200) / 0.5));
     border-radius: 10px;
 }
 
 #scoreboard::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, rgba(100, 150, 255, 0.7), rgba(80, 120, 200, 0.7));
+    background: linear-gradient(180deg, rgb(var(--primary-rgb, 100 150 255) / 0.7), rgb(var(--primary-dark-rgb, 80 120 200) / 0.7));
 }

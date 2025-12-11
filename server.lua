@@ -1,4 +1,7 @@
 -- server.lua
+-- This file is optional and not currently used by the default implementation.
+-- The client builds the player list locally using GetActivePlayers() and GetPlayerName().
+-- You can enable this if you prefer server-side player list management.
 
 RegisterNetEvent("simple_scoreboard:requestPlayers", function()
     local src = source
@@ -6,7 +9,6 @@ RegisterNetEvent("simple_scoreboard:requestPlayers", function()
 
     for _, id in ipairs(GetPlayers()) do
         local name = GetPlayerName(id) or ("Player " .. id)
-        local ping = GetPlayerPing(id) or 0
 
         table.insert(players, {
             id = tonumber(id),
