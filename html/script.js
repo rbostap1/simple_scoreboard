@@ -104,6 +104,8 @@ window.addEventListener("message", function (event) {
         
         if (data.highlightColor) {
             highlightColor = data.highlightColor;
+            // Apply highlight color as CSS variable
+            root.style.setProperty("--highlight-color", highlightColor);
         }
         
         // Store and apply colors from config

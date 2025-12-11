@@ -11,6 +11,7 @@ body {
     --primary-dark: #4A6FA5;
     --text-white: #FFFFFF;
     --text-accent: #A0B5FF;
+    --highlight-color: #6495FF;
     --background: rgba(20, 20, 40, 0.92);
     --background-dark: rgba(10, 10, 25, 0.95);
     --border: #FFFFFF;
@@ -171,22 +172,22 @@ tbody tr:hover {
 }
 
 tbody tr.current-player {
-    background: linear-gradient(90deg, rgb(var(--primary-rgb, 100 150 255) / 0.25), rgb(var(--primary-rgb, 100 150 255) / 0.25));
-    border: 1px solid rgb(var(--primary-rgb, 100 150 255) / 0.6);
+    background: linear-gradient(90deg, rgb(var(--highlight-color-rgb, 100 150 255) / 0.25), rgb(var(--highlight-color-rgb, 100 150 255) / 0.25));
+    border: 1px solid rgb(var(--highlight-color-rgb, 100 150 255) / 0.6);
     border-radius: 8px;
 }
 
 tbody tr.current-player:hover {
-    background: linear-gradient(90deg, rgb(var(--primary-rgb, 100 150 255) / 0.4), rgb(var(--primary-rgb, 100 150 255) / 0.4));
+    background: linear-gradient(90deg, rgb(var(--highlight-color-rgb, 100 150 255) / 0.4), rgb(var(--highlight-color-rgb, 100 150 255) / 0.4));
 }
 
 tbody tr.current-player td {
-    color: var(--primary);
+    color: var(--highlight-color, #6495FF);
     font-weight: 700;
 }
 
 tbody tr.current-player td:first-child {
-    color: var(--primary);
+    color: var(--highlight-color, #6495FF);
 }
 
 td {
