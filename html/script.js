@@ -6,7 +6,12 @@ let highlightEnabled = true;
 let highlightColor = "#6495FF";
 let logoEnabled = true;
 let colors = {};
+let hudEnabled = false;
 const playersPerPage = 12;
+
+const hudEl = document.getElementById("playerhud");
+const hudIdEl = document.getElementById("playerhud-id");
+const hudNameEl = document.getElementById("playerhud-name");
 
 // Convert hex color to RGB values
 function hexToRgb(hex) {
@@ -166,6 +171,41 @@ window.addEventListener("message", function (event) {
             root.style.setProperty("--hover-bg-dark-opacity", colors.hoverBgDarkOpacity ?? 0.15);
             root.style.setProperty("--logo-glow-opacity", colors.logoGlowOpacity ?? 0.3);
             root.style.setProperty("--logo-glow-size", colors.logoGlowSize || "20px");
+        }
+    }
+
+    if (data.action === "hudConfig" && data.hud) {
+        const root = document.documentElement;
+        hudEnabled = !!data.hud.enabled;
+
+        if (data.hud.backgroundColor) {
+            root.style.setProperty("--hud-bg", data.hud.backgroundColor);
+        }
+        if (data.hud.borderColor) {
+            root.style.setProperty("--hud-border", data.hud.borderColor);
+        }
+        if (data.hud.textColor) {
+            root.style.setProperty("--hud-text", data.hud.textColor);
+        }
+
+        hudEl.style.display = hudEnabled ? "flex" : "none";
+    }
+
+    if (data.action === "hudToggle") {
+        hudEnabled = !!data.enabled;
+        hudEl.style.display = hudEnabled ? "flex" : "none";
+    }
+
+    if (data.action === "hudUpdate") {
+        if (data.playerId !== undefined && hudIdEl) {
+            hudIdEl.textContent = `ID: ${data.playerId}`;
+        }
+        if (data.playerName && hudNameEl) {
+            hudNameEl.textContent = data.playerName;
+        }
+
+        if (hudEnabled) {
+            hudEl.style.display = "flex";
         }
     }
 

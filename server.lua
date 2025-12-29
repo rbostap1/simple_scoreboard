@@ -1,22 +1,57 @@
 -- server.lua
--- This file is optional and not currently used by the default implementation.
--- The client builds the player list locally using GetActivePlayers() and GetPlayerName().
--- You can enable this if you prefer server-side player list management.
+-- Optional server-side scoreboard provider. The default client script builds the
+-- player list locally, but if you uncomment this file in fxmanifest.lua you can
+-- serve both player data and the full config directly from the server.
 
-RegisterNetEvent("simple_scoreboard:requestPlayers", function()
-    local src = source
+-- Build a fresh player list with id and name for each connected player.
+local function buildPlayerList()
     local players = {}
 
     for _, id in ipairs(GetPlayers()) do
-        local name = GetPlayerName(id) or ("Player " .. id)
-
+        local playerId = tonumber(id)
         table.insert(players, {
-            id = tonumber(id),
-            name = name,
-            ping = ping
+            id = playerId,
+            name = GetPlayerName(id) or ("Player " .. playerId)
         })
     end
 
-    -- send list back to the requesting client
-    TriggerClientEvent("simple_scoreboard:updatePlayers", src, players)
+    return players
+end
+
+-- Pack every scoreboard display option so clients don't need to hardcode them.
+local function buildConfigPayload()
+    return {
+        serverName = Config.ServerName or "YOUR SERVER NAME HERE",
+        toggleKey = Config.ToggleKey or "F9",
+        maxPlayers = Config.MaxPlayers or 32,
+
+        logoEnabled = Config.EnableLogo ~= false,
+        logo = (Config.EnableLogo ~= false and Config.LogoURL) or "",
+
+        highlightEnabled = Config.HighlightCurrentPlayer ~= false,
+        highlightColor = Config.HighlightColor or "#6495FF",
+
+        colors = Config.Colors or {}
+    }
+end
+
+-- Return only the player list (client will still use its own config).
+RegisterNetEvent("simple_scoreboard:requestPlayers", function()
+    local src = source
+    TriggerClientEvent("simple_scoreboard:updatePlayers", src, buildPlayerList())
+end)
+
+-- Return just the config so the UI can mirror server settings.
+RegisterNetEvent("simple_scoreboard:requestConfig", function()
+    local src = source
+    TriggerClientEvent("simple_scoreboard:updateConfig", src, buildConfigPayload())
+end)
+
+-- Return both player data and config together for one-stop syncing.
+RegisterNetEvent("simple_scoreboard:requestScoreboardData", function()
+    local src = source
+    TriggerClientEvent("simple_scoreboard:updateScoreboardData", src, {
+        players = buildPlayerList(),
+        config = buildConfigPayload()
+    })
 end)
