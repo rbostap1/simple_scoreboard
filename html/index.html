@@ -12,24 +12,36 @@
     </div>
 
     <div id="scoreboard">
-        <div id="header">
-            <div>
-                <img id="logo" src="" alt="Logo" style="display:none;">
-                <div id="servername">Server Name</div>
+        <div id="header" class="sb-hero">
+            <div class="sb-hero-main">
+                <div class="sb-logo-wrap">
+                    <img id="logo" src="" alt="Logo" style="display:none;">
+                </div>
+                <div class="sb-title">
+                    <span class="sb-kicker">Live Roster</span>
+                    <div id="servername">Server Name</div>
+                </div>
             </div>
-            <div id="playercount">0 / 32</div>
+            <div class="sb-hero-meta">
+                <div id="playercount" class="sb-pill">0 / 32</div>
+                <div class="sb-meta-text">Players online</div>
+            </div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                </tr>
-            </thead>
-            <tbody id="playerlist">
-            </tbody>
-        </table>
+        <div class="sb-divider"></div>
+
+        <div class="sb-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+                <tbody id="playerlist">
+                </tbody>
+            </table>
+        </div>
 
         <div id="pagination">
             <button id="prevPage" class="page-btn">← Previous</button>

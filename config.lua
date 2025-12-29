@@ -41,38 +41,53 @@ Config.HudColors = {
 --       COLOR SETTINGS          --
 -----------------------------------
 
--- 🎨 Primary accent color (used for borders, highlights, glows)
+-- 🎨 Comprehensive color and design customization
 Config.Colors = {
-    primary = "#6495FF",           -- Primary blue accent color
-    primaryDark = "#4A6FA5",       -- Darker variant of primary
+    -- Primary colors
+    primary = "#6495FF",           -- Primary accent color (buttons, highlights, borders)
+    primaryDark = "#4A6FA5",       -- Darker variant for gradients
     
+    -- Text colors
     textWhite = "#FFFFFF",         -- Main text color
-    textAccent = "#A0B5FF",        -- Accent text color (ID, headers)
+    textAccent = "#A0B5FF",        -- Accent text (IDs, headers)
+    textSecondary = "#8B9DC3",     -- Secondary text elements
     
-    background = "#14142850",      -- Main scoreboard background (dark blue/purple)
-    backgroundDark = "#0A0A1950",  -- Darker background layer
+    -- Background colors
+    background = "rgba(18, 18, 35, 0.95)",      -- Main scoreboard background
+    backgroundDark = "rgba(12, 12, 25, 0.98)",  -- Darker background gradient
+    cardBg = "rgba(25, 25, 45, 0.6)",           -- Card/container backgrounds
     
+    -- Border settings
     border = "#FFFFFF",            -- Border color
-    borderOpacity = 0.1,           -- Border opacity (0-1)
+    borderOpacity = 0.08,          -- Border opacity (0-1)
     
-    headerBorder = "#6495FF",      -- Header bottom border color
-    headerBorderOpacity = 0.4,     -- Header border opacity (0-1)
+    -- Header styling
+    headerBorder = "#6495FF",      -- Header divider color
+    headerBorderOpacity = 0.5,     -- Header border opacity (0-1)
     
-    playerRow = "#FFFFFF",         -- Player row background color
-    playerRowLightOpacity = 0.03,  -- Light player row opacity (0-1)
-    playerRowDarkOpacity = 0.05,   -- Dark player row opacity (0-1)
+    -- Player row colors
+    playerRow = "#FFFFFF",         -- Player row base color
+    playerRowLightOpacity = 0.04,  -- Light row opacity (0-1)
+    playerRowDarkOpacity = 0.06,   -- Dark row opacity (0-1)
     
-    playerCountBg = "#6495FF",     -- Player count background
-    playerCountBgOpacity = 0.15,   -- Player count background opacity (0-1)
-    playerCountBorder = "#6495FF", -- Player count border
-    playerCountBorderOpacity = 0.3,-- Player count border opacity (0-1)
+    -- Player count badge
+    playerCountBg = "#6495FF",     -- Badge background color
+    playerCountBgOpacity = 0.2,    -- Badge background opacity (0-1)
+    playerCountBorder = "#6495FF", -- Badge border color
+    playerCountBorderOpacity = 0.4,-- Badge border opacity (0-1)
     
+    -- Hover effects
     hoverBg = "#6495FF",           -- Hover background color
-    hoverBgOpacity = 0.15,         -- Hover background opacity (0-1)
-    hoverBgDark = "#5078C8",       -- Darker hover color
-    hoverBgDarkOpacity = 0.15,     -- Darker hover opacity (0-1)
+    hoverBgOpacity = 0.2,          -- Hover opacity (0-1)
+    hoverBgDark = "#5078C8",       -- Darker hover gradient
+    hoverBgDarkOpacity = 0.2,      -- Darker hover opacity (0-1)
     
-    logoGlow = "#6495FF",          -- Logo glow effect color
-    logoGlowOpacity = 0.3,         -- Logo glow opacity (0-1)
-    logoGlowSize = "20px",         -- Logo glow size
+    -- Logo effects
+    logoGlow = "#6495FF",          -- Logo glow color
+    logoGlowOpacity = 0.4,         -- Logo glow opacity (0-1)
+    logoGlowSize = "25px",         -- Logo glow spread size
+    
+    -- Shadow colors
+    shadowColor = "rgba(0, 0, 0, 0.3)",      -- Standard shadow
+    shadowStrong = "rgba(0, 0, 0, 0.5)",     -- Strong shadow for emphasis
 }
