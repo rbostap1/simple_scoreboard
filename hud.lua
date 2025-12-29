@@ -47,10 +47,13 @@ CreateThread(function()
 
         if enabled then
             local player = PlayerId()
+            local playerCount = #GetActivePlayers()
             SendNUIMessage({
                 action = "hudUpdate",
                 playerId = GetPlayerServerId(player),
-                playerName = GetPlayerName(player) or "Player"
+                playerName = GetPlayerName(player) or "Player",
+                playerCount = playerCount,
+                maxPlayers = Config.MaxPlayers or 32
             })
 
             if lastEnabled ~= enabled then
