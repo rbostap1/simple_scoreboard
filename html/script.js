@@ -189,12 +189,24 @@ window.addEventListener("message", function (event) {
             root.style.setProperty("--hud-text", data.hud.textColor);
         }
 
-        hudEl.style.display = hudEnabled ? "flex" : "none";
+        if (hudEnabled) {
+            hudEl.classList.remove("hidden");
+            hudEl.style.display = "flex";
+        } else {
+            hudEl.classList.add("hidden");
+            hudEl.style.display = "none";
+        }
     }
 
     if (data.action === "hudToggle") {
         hudEnabled = !!data.enabled;
-        hudEl.style.display = hudEnabled ? "flex" : "none";
+        if (hudEnabled) {
+            hudEl.classList.remove("hidden");
+            hudEl.style.display = "flex";
+        } else {
+            hudEl.classList.add("hidden");
+            hudEl.style.display = "none";
+        }
     }
 
     if (data.action === "hudUpdate") {
@@ -209,6 +221,7 @@ window.addEventListener("message", function (event) {
         }
 
         if (hudEnabled) {
+            hudEl.classList.remove("hidden");
             hudEl.style.display = "flex";
         }
     }
