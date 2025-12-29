@@ -32,6 +32,11 @@ body {
     --logo-glow: #6495FF;
     --logo-glow-opacity: 0.3;
     --logo-glow-size: 20px;
+
+    /* HUD defaults */
+    --hud-bg: rgba(20, 20, 40, 0.85);
+    --hud-border: #6495FF;
+    --hud-text: #FFFFFF;
 }
 
 /* Scoreboard container - Glassmorphism style */
@@ -196,6 +201,40 @@ td {
     text-align: left;
     border: none;
     color: #e8eeff;
+}
+
+/* Player HUD (top-left) */
+#playerhud {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    min-width: 160px;
+    background: var(--hud-bg);
+    color: var(--hud-text);
+    border: 1px solid var(--hud-border);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    letter-spacing: 0.3px;
+    z-index: 999;
+}
+
+#playerhud.hidden {
+    display: none;
+}
+
+#playerhud-id {
+    font-size: 14px;
+    font-weight: 700;
+    opacity: 0.9;
+}
+
+#playerhud-name {
+    font-size: 16px;
+    font-weight: 600;
 }
 
 td:first-child {
