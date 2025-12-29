@@ -214,48 +214,13 @@ td {
     padding: 18px 20px;
     min-width: 240px;
     
-    /* Advanced glassmorphism effect */
-    background: linear-gradient(135deg, var(--hud-bg) 0%, rgba(15, 15, 35, 0.92) 100%);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    
     color: var(--hud-text);
-    
-    /* Gradient border effect */
-    border: 2px solid transparent;
-    background-clip: padding-box;
-    border-radius: 16px;
-    
-    /* Enhanced shadows with glow */
-    box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        0 0 0 1px rgba(255, 255, 255, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1),
-        0 0 40px rgba(100, 149, 255, 0.2);
     
     letter-spacing: 0.3px;
     z-index: 999;
     
     /* Smooth fade-in animation */
     animation: hudFadeIn 0.4s ease-out;
-}
-
-/* Animated border glow */
-#playerhud::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: 16px;
-    padding: 2px;
-    background: linear-gradient(135deg, var(--hud-border), rgba(100, 149, 255, 0.3), var(--hud-border));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    z-index: -1;
-    animation: borderGlow 3s ease-in-out infinite;
 }
 
 @keyframes hudFadeIn {
@@ -266,15 +231,6 @@ td {
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
-    }
-}
-
-@keyframes borderGlow {
-    0%, 100% {
-        opacity: 0.6;
-    }
-    50% {
-        opacity: 1;
     }
 }
 

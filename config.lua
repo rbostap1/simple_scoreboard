@@ -27,14 +27,14 @@ Config.HighlightCurrentPlayer = true
 -- 🎨 Color for current player highlight (use hex color code)
 Config.HighlightColor = "#6495FF"
 
--- 👤 Mini HUD toggle (top-left) to show player's name + ID
+-- 👤 Player HUD toggle (bottom-right) to show player's name + ID
+-- Note: HUD displays as minimal text elements without background box or borders
 Config.EnablePlayerHud = true
 
--- 🎨 HUD colors
+-- 🎨 HUD colors (only text colors are used, no background or border)
 Config.HudColors = {
     text = "#FFFFFF",                 -- Text color for HUD labels
-    background = "rgba(20, 20, 40, 0.85)", -- Background color (supports rgba for opacity)
-    border = "#6495FF"                -- Border/accent color
+    border = "#6495FF"                -- Accent color for player count and ID
 }
 
 -----------------------------------
