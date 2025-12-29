@@ -148,6 +148,7 @@ window.addEventListener("message", function (event) {
             setColorVar("primary-dark", colors.primaryDark, "#4A6FA5");
             setColorVar("text-white", colors.textWhite, "#FFFFFF");
             setColorVar("text-accent", colors.textAccent, "#A0B5FF");
+            setColorVar("text-secondary", colors.textSecondary, "#8B9DC3");
             setColorVar("border", colors.border, "#FFFFFF");
             setColorVar("header-border", colors.headerBorder, "#6495FF");
             setColorVar("player-row", colors.playerRow, "#FFFFFF");
@@ -157,21 +158,24 @@ window.addEventListener("message", function (event) {
             setColorVar("hover-bg-dark", colors.hoverBgDark, "#5078C8");
             setColorVar("logo-glow", colors.logoGlow, "#6495FF");
             
-            // Handle background colors separately (they include opacity in the value)
-            root.style.setProperty("--background", colors.background || "rgba(20, 20, 40, 0.92)");
-            root.style.setProperty("--background-dark", colors.backgroundDark || "rgba(10, 10, 25, 0.95)");
+            // Handle background and shadow colors (they include opacity in the value)
+            root.style.setProperty("--background", colors.background || "rgba(18, 18, 35, 0.95)");
+            root.style.setProperty("--background-dark", colors.backgroundDark || "rgba(12, 12, 25, 0.98)");
+            root.style.setProperty("--card-bg", colors.cardBg || "rgba(25, 25, 45, 0.6)");
+            root.style.setProperty("--shadow-color", colors.shadowColor || "rgba(0, 0, 0, 0.3)");
+            root.style.setProperty("--shadow-strong", colors.shadowStrong || "rgba(0, 0, 0, 0.5)");
             
             // Set opacity values
-            root.style.setProperty("--border-opacity", colors.borderOpacity ?? 0.1);
-            root.style.setProperty("--header-border-opacity", colors.headerBorderOpacity ?? 0.4);
-            root.style.setProperty("--player-row-light-opacity", colors.playerRowLightOpacity ?? 0.03);
-            root.style.setProperty("--player-row-dark-opacity", colors.playerRowDarkOpacity ?? 0.05);
-            root.style.setProperty("--player-count-bg-opacity", colors.playerCountBgOpacity ?? 0.15);
-            root.style.setProperty("--player-count-border-opacity", colors.playerCountBorderOpacity ?? 0.3);
-            root.style.setProperty("--hover-bg-opacity", colors.hoverBgOpacity ?? 0.15);
-            root.style.setProperty("--hover-bg-dark-opacity", colors.hoverBgDarkOpacity ?? 0.15);
-            root.style.setProperty("--logo-glow-opacity", colors.logoGlowOpacity ?? 0.3);
-            root.style.setProperty("--logo-glow-size", colors.logoGlowSize || "20px");
+            root.style.setProperty("--border-opacity", colors.borderOpacity ?? 0.08);
+            root.style.setProperty("--header-border-opacity", colors.headerBorderOpacity ?? 0.5);
+            root.style.setProperty("--player-row-light-opacity", colors.playerRowLightOpacity ?? 0.04);
+            root.style.setProperty("--player-row-dark-opacity", colors.playerRowDarkOpacity ?? 0.06);
+            root.style.setProperty("--player-count-bg-opacity", colors.playerCountBgOpacity ?? 0.2);
+            root.style.setProperty("--player-count-border-opacity", colors.playerCountBorderOpacity ?? 0.4);
+            root.style.setProperty("--hover-bg-opacity", colors.hoverBgOpacity ?? 0.2);
+            root.style.setProperty("--hover-bg-dark-opacity", colors.hoverBgDarkOpacity ?? 0.2);
+            root.style.setProperty("--logo-glow-opacity", colors.logoGlowOpacity ?? 0.4);
+            root.style.setProperty("--logo-glow-size", colors.logoGlowSize || "25px");
         }
     }
 
