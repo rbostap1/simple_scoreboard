@@ -12,6 +12,7 @@ const playersPerPage = 12;
 const hudEl = document.getElementById("playerhud");
 const hudIdEl = document.getElementById("playerhud-id");
 const hudNameEl = document.getElementById("playerhud-name");
+const hudPlayersEl = document.getElementById("playerhud-players");
 
 // Convert hex color to RGB values
 function hexToRgb(hex) {
@@ -202,6 +203,9 @@ window.addEventListener("message", function (event) {
         }
         if (data.playerName && hudNameEl) {
             hudNameEl.textContent = data.playerName;
+        }
+        if (data.playerCount !== undefined && data.maxPlayers !== undefined && hudPlayersEl) {
+            hudPlayersEl.textContent = `Players: ${data.playerCount} / ${data.maxPlayers}`;
         }
 
         if (hudEnabled) {
