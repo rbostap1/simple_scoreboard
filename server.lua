@@ -38,7 +38,10 @@ end
 -- Return only the player list (client will still use its own config).
 RegisterNetEvent("simple_scoreboard:requestPlayers", function()
     local src = source
-    TriggerClientEvent("simple_scoreboard:updatePlayers", src, buildPlayerList())
+    local playerList = buildPlayerList()
+    print("[Scoreboard] Server received player request from player " .. src)
+    print("[Scoreboard] Sending " .. #playerList .. " players to client")
+    TriggerClientEvent("simple_scoreboard:updatePlayers", src, playerList)
 end)
 
 -- Return just the config so the UI can mirror server settings.
