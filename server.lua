@@ -3,6 +3,8 @@
 -- player list locally, but if you uncomment this file in fxmanifest.lua you can
 -- serve both player data and the full config directly from the server.
 
+print("[Scoreboard] Server script loading...")
+
 -- Build a fresh player list with id and name for each connected player.
 local function buildPlayerList()
     local players = {}
@@ -41,6 +43,7 @@ RegisterNetEvent("simple_scoreboard:requestPlayers", function()
     local playerList = buildPlayerList()
     print("[Scoreboard] Server received player request from player " .. src)
     print("[Scoreboard] Sending " .. #playerList .. " players to client")
+    print("[Scoreboard] Player data: " .. json.encode(playerList))
     TriggerClientEvent("simple_scoreboard:updatePlayers", src, playerList)
 end)
 
@@ -58,3 +61,6 @@ RegisterNetEvent("simple_scoreboard:requestScoreboardData", function()
         config = buildConfigPayload()
     })
 end)
+
+print("[Scoreboard] Server script loaded successfully!")
+print("[Scoreboard] Registered event handlers for player list requests")
