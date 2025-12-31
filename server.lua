@@ -66,27 +66,44 @@ print("[Scoreboard] Server script loaded successfully!")
 print("[Scoreboard] Registered event handlers for player list requests")
 
 -- Creator Join Message
+local creatorHasJoined = false
+
 if Config.EnableCreatorMessage then
-    AddEventHandler('playerConnecting', function()
+    AddEventHandler('playerConnecting', function(name, reason, deferrals)
         local src = source
+        local identifiers = GetPlayerIdentifiers(src)
         
-        -- Small delay to ensure player identifiers are loaded
-        SetTimeout(1000, function()
-            local identifiers = GetPlayerIdentifiers(src)
-            
-            if identifiers then
-                for _, id in ipairs(identifiers) do
-                    if id == Config.CreatorIdentifier then
-                        -- Broadcast the message to all players
-                        TriggerClientEvent('chat:addMessage', -1, {
-                            args = { Config.CreatorMessage }
-                        })
-                        print("[Scoreboard] Creator joined the server!")
-                        break
+        if identifiers then
+            for _, id in ipairs(identifiers) do
+                if id == Config.CreatorIdentifier then
+                    if not creatorHasJoined then
+                        creatorHasJoined = true
+                        -- Broadcast the message to all players after a short delay
+                        SetTimeout(500, function()
+                            TriggerClientEvent('chat:addMessage', -1, {
+                                args = { "SERVER" },
+                                msg = Config.CreatorMessage
+                            })
+                            print("[Scoreboard] Creator joined the server!")
+                        end)
                     end
+                    break
                 end
             end
-        end)
+        end
     end)
+    
+    AddEventHandler('playerDropped', function(reason)
+        local identifiers = GetPlayerIdentifiers(source)
+        if identifiers then
+            for _, id in ipairs(identifiers) do
+                if id == Config.CreatorIdentifier then
+                    creatorHasJoined = false  -- Reset when creator leaves
+                    break
+                end
+            end
+        end
+    end)
+    
     print("[Scoreboard] Creator join message enabled")
 end
