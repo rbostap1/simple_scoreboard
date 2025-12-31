@@ -37,6 +37,11 @@ Config.HudColors = {
     border = "#6495FF"                -- Accent color for player count and ID
 }
 
+-- 🎉 Creator Join Message
+Config.EnableCreatorMessage = true    -- Enable/disable creator join message
+Config.CreatorIdentifier = "license:YOUR_LICENSE_HERE"  -- Your license identifier
+Config.CreatorMessage = "^3The script creator ^2Ryan Bostaph ^3has joined the server!^0"  -- Message to display
+
 -----------------------------------
 --       COLOR SETTINGS          --
 -----------------------------------

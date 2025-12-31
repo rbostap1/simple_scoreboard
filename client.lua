@@ -43,12 +43,12 @@ CreateThread(function()
         Config.ToggleKey or "F9"
     )
 
-    -- Controller binding (DPAD UP)
+    -- Controller binding (D-Pad Up)
     RegisterKeyMapping(
         "+showscoreboard",
         "Show Scoreboard",
         "PAD_DIGITALBUTTON",
-        "DPAD_UP"
+        "INPUT_FRONTEND_UP"
     )
 
     -- Send config data (server name + logo + max players + highlight settings + colors) to NUI once
