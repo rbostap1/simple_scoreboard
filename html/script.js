@@ -232,9 +232,14 @@ window.addEventListener("message", function (event) {
     }
 
     if (data.action === "update") {
-        if (!Array.isArray(data.players)) return;
+        console.log("[Scoreboard] NUI received update message", data);
+        if (!Array.isArray(data.players)) {
+            console.error("[Scoreboard] NUI: Players data is not an array", data.players);
+            return;
+        }
 
         allPlayers = data.players;
+        console.log("[Scoreboard] NUI: Player count:", allPlayers.length);
         currentPage = 1; // Reset to first page
         
         // Store current player ID if provided
