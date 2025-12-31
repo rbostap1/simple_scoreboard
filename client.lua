@@ -64,37 +64,27 @@ CreateThread(function()
     })
 end)
 
--- Build the player list (ID + Name only)
+-- Request server-side player list
 function updateScoreboard()
-    local players = {}
-
-    -- Always include the local player first
-    local myPlayer = PlayerId()
-    local myPlayerId = GetPlayerServerId(myPlayer)
-    table.insert(players, {
-        id = myPlayerId,
-        name = GetPlayerName(myPlayer)
-    })
-
-    -- Add any other active/streamed players
-    for _, player in ipairs(GetActivePlayers()) do
-        if player ~= myPlayer then
-            table.insert(players, {
-                id = GetPlayerServerId(player),
-                name = GetPlayerName(player)
-            })
-        end
-    end
-
-    -- Send list to NUI
-    SendNUIMessage({
-        action = "update",
-        players = players,
-        currentPlayerId = myPlayerId
-    })
+    TriggerServerEvent("simple_scoreboard:requestPlayers")
 end
 
--- Refresh every second while scoreboard is open
+-- Handle server response with player list
+RegisterNetEvent("simple_scoreboard:updatePlayers", function(players)
+    if players and type(players) == "table" then
+        local myPlayer = PlayerId()
+        local myPlayerId = GetPlayerServerId(myPlayer)
+        
+        -- Send list to NUI
+        SendNUIMessage({
+            action = "update",
+            players = players,
+            currentPlayerId = myPlayerId
+        })
+    end
+end)
+
+-- Refresh player list while scoreboard is open
 CreateThread(function()
     while true do
         Wait(1000)
