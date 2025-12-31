@@ -51,11 +51,21 @@ end)
 -- Periodically push HUD updates (ID + Name + Player Count)
 CreateThread(function()
     local lastEnabled = nil
+    local firstUpdate = true
 
     while true do
         local enabled = hudEnabled()
 
         if enabled then
+            -- Request server-side player list for accurate count
+            TriggerServerEvent("simple_scoreboard:requestPlayers")
+
+            -- On first update, wait a bit for server response
+            if firstUpdate then
+                Wait(500)
+                firstUpdate = false
+            end
+
             local player = PlayerId()
             SendNUIMessage({
                 action = "hudUpdate",
@@ -69,14 +79,12 @@ CreateThread(function()
                 sendHudConfig()
             end
 
-            -- Request server-side player list for accurate count
-            TriggerServerEvent("simple_scoreboard:requestPlayers")
-
             Wait(2000)
         else
             if lastEnabled ~= enabled then
                 SendNUIMessage({ action = "hudToggle", enabled = false })
             end
+            firstUpdate = true
             Wait(5000)
         end
 
