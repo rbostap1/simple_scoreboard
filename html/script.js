@@ -28,24 +28,38 @@ function renderPlayerPage() {
     const list = document.getElementById("playerlist");
     list.innerHTML = "";
 
+    if (!allPlayers || allPlayers.length === 0) {
+        list.innerHTML = "<div class='empty-state'>No players online</div>";
+        return;
+    }
+
     const startIdx = (currentPage - 1) * playersPerPage;
     const endIdx = startIdx + playersPerPage;
     const pagePlayers = allPlayers.slice(startIdx, endIdx);
 
-    pagePlayers.forEach(player => {
-        const row = document.createElement("tr");
+    pagePlayers.forEach((player, index) => {
+        const card = document.createElement("div");
+        card.className = "player-card";
         
         // Apply highlight to current player if enabled
-        if (highlightEnabled && player.id === currentPlayerId) {
-            row.classList.add("current-player");
-            row.style.setProperty("--highlight-color", highlightColor);
+        if (highlightEnabled && player && player.id === currentPlayerId) {
+            card.classList.add("current-player");
+            card.style.setProperty("--highlight-color", highlightColor);
         }
         
-        row.innerHTML = `
-            <td>${player.id}</td>
-            <td>${player.name}</td>
+        const playerId = player && player.id ? player.id : "?";
+        const playerName = player && player.name ? player.name : "Unknown";
+        
+        card.innerHTML = `
+            <div class="player-card-header">
+                <div class="player-rank">${startIdx + index + 1}</div>
+                <div class="player-badge">${playerId}</div>
+            </div>
+            <div class="player-card-body">
+                <div class="player-name">${playerName}</div>
+            </div>
         `;
-        list.appendChild(row);
+        list.appendChild(card);
     });
 
     // Update pagination buttons
