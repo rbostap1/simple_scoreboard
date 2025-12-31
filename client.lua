@@ -73,10 +73,13 @@ end
 -- Handle server response with player list
 RegisterNetEvent("simple_scoreboard:updatePlayers", function(players)
     print("[Scoreboard] Client received player data from server")
+    print("[Scoreboard] Data type: " .. type(players))
     if players and type(players) == "table" then
         print("[Scoreboard] Player count: " .. #players)
+        print("[Scoreboard] Player data: " .. json.encode(players))
         local myPlayer = PlayerId()
         local myPlayerId = GetPlayerServerId(myPlayer)
+        print("[Scoreboard] Current player ID: " .. myPlayerId)
         
         -- Send list to NUI
         SendNUIMessage({
