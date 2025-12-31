@@ -38,6 +38,16 @@ CreateThread(function()
     sendHudConfig()
 end)
 
+-- Handle server response with player list
+RegisterNetEvent("simple_scoreboard:updatePlayers", function(players)
+    if players and type(players) == "table" then
+        SendNUIMessage({
+            action = "hudPlayerCount",
+            playerCount = #players
+        })
+    end
+end)
+
 -- Periodically push HUD updates (ID + Name)
 CreateThread(function()
     local lastEnabled = nil
@@ -47,18 +57,19 @@ CreateThread(function()
 
         if enabled then
             local player = PlayerId()
-            local playerCount = #GetActivePlayers()
             SendNUIMessage({
                 action = "hudUpdate",
                 playerId = GetPlayerServerId(player),
                 playerName = GetPlayerName(player) or "Player",
-                playerCount = playerCount,
                 maxPlayers = Config.MaxPlayers or 32
             })
 
             if lastEnabled ~= enabled then
                 sendHudConfig()
             end
+
+            -- Request server-side player list for accurate count
+            TriggerServerEvent("simple_scoreboard:requestPlayers")
 
             Wait(2000)
         else
