@@ -38,17 +38,17 @@ CreateThread(function()
     sendHudConfig()
 end)
 
+-- Store the latest player count from server
+local latestPlayerCount = 0
+
 -- Handle server response with player list
 RegisterNetEvent("simple_scoreboard:updatePlayers", function(players)
     if players and type(players) == "table" then
-        SendNUIMessage({
-            action = "hudPlayerCount",
-            playerCount = #players
-        })
+        latestPlayerCount = #players
     end
 end)
 
--- Periodically push HUD updates (ID + Name)
+-- Periodically push HUD updates (ID + Name + Player Count)
 CreateThread(function()
     local lastEnabled = nil
 
@@ -61,6 +61,7 @@ CreateThread(function()
                 action = "hudUpdate",
                 playerId = GetPlayerServerId(player),
                 playerName = GetPlayerName(player) or "Player",
+                playerCount = latestPlayerCount,
                 maxPlayers = Config.MaxPlayers or 32
             })
 
