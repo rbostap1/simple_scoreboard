@@ -69,41 +69,66 @@ print("[Scoreboard] Registered event handlers for player list requests")
 local creatorHasJoined = false
 
 if Config.EnableCreatorMessage then
-    AddEventHandler('playerConnecting', function(name, reason, deferrals)
+    print("[Scoreboard] Creator join message ENABLED")
+    print("[Scoreboard] Looking for identifier: " .. Config.CreatorIdentifier)
+    
+    AddEventHandler('playerJoining', function(oldId)
         local src = source
-        local identifiers = GetPlayerIdentifiers(src)
+        print("[Scoreboard] Player joining event fired for source: " .. src)
         
-        if identifiers then
-            for _, id in ipairs(identifiers) do
-                if id == Config.CreatorIdentifier then
-                    if not creatorHasJoined then
-                        creatorHasJoined = true
-                        -- Broadcast the message to all players after a short delay
-                        SetTimeout(500, function()
+        -- Wait a bit for identifiers to be fully loaded
+        SetTimeout(1000, function()
+            local identifiers = GetPlayerIdentifiers(src)
+            
+            if identifiers then
+                print("[Scoreboard] Found " .. #identifiers .. " identifiers for player " .. src)
+                for _, id in ipairs(identifiers) do
+                    print("[Scoreboard] Checking identifier: " .. id)
+                    if id == Config.CreatorIdentifier then
+                        print("[Scoreboard] MATCH FOUND! Creator identifier matched!")
+                        if not creatorHasJoined then
+                            creatorHasJoined = true
+                            print("[Scoreboard] Broadcasting creator join message to all players")
+                            
+                            -- Try multiple methods to ensure message is sent
+                            -- Method 1: Standard chat message
                             TriggerClientEvent('chat:addMessage', -1, {
-                                args = { "SERVER" },
-                                msg = Config.CreatorMessage
+                                args = { "^3SERVER" },
+                                color = { 255, 255, 0 }
                             })
-                            print("[Scoreboard] Creator joined the server!")
-                        end)
+                            TriggerClientEvent('chat:addMessage', -1, {
+                                args = { Config.CreatorMessage }
+                            })
+                            
+                            -- Method 2: chatMessage event (alternative)
+                            TriggerClientEvent('chatMessage', -1, "^3SERVER", { 255, 255, 0 }, Config.CreatorMessage)
+                            
+                            print("[Scoreboard] Creator join message sent!")
+                        else
+                            print("[Scoreboard] Creator already joined, skipping duplicate message")
+                        end
+                        break
                     end
-                    break
                 end
+            else
+                print("[Scoreboard] WARNING: No identifiers found for player " .. src)
             end
-        end
+        end)
     end)
     
     AddEventHandler('playerDropped', function(reason)
-        local identifiers = GetPlayerIdentifiers(source)
+        local src = source
+        local identifiers = GetPlayerIdentifiers(src)
         if identifiers then
             for _, id in ipairs(identifiers) do
                 if id == Config.CreatorIdentifier then
-                    creatorHasJoined = false  -- Reset when creator leaves
+                    creatorHasJoined = false
+                    print("[Scoreboard] Creator left the server, reset flag")
                     break
                 end
             end
         end
     end)
-    
-    print("[Scoreboard] Creator join message enabled")
+else
+    print("[Scoreboard] Creator join message DISABLED in config")
 end
