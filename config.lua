@@ -41,7 +41,7 @@ Config.HudColors = {
 Config.EnableCreatorMessage = true    -- Enable/disable creator join message
 Config.CreatorIdentifier = "license:YOUR_LICENSE_HERE"  -- Your license identifier
 Config.CreatorMessageSender = "^5simple_scoreboard^0"  -- Name that appears before the message (supports color codes)
-Config.CreatorMessage = "^3The script creator ^2Ryan Bostaph ^3has joined the server!^0"  -- Message to display
+Config.CreatorMessage = "^3The script creator/editor ^2NAME HERE ^3has joined the server!^0"  -- Message to display
 
 -----------------------------------
 --       COLOR SETTINGS          --
