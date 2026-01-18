@@ -33,6 +33,7 @@ ensure simple_scoreboard
 - **🔧 Improved Configuration**: New color options including `textSecondary`, `cardBg`, `shadowColor`, and more
 - **💬 Creator Messages**: Optional join message system with customizable text and colors
 - **🐛 Debug Logging**: Enhanced console logging for better troubleshooting
+ - **⏱️ Smarter HUD Refresh**: HUD updates on scoreboard changes, with a 5-minute fallback refresh
 
 ## Key Configuration (config.lua)
 ```lua
@@ -129,14 +130,14 @@ Config.Colors = {
   - Displays in **bottom-right corner** (new location!)
   - Shows your ID, name, and live player count
   - Glassmorphism design with hover effects
-  - Updates every 2 seconds
+  - Auto-refreshes on scoreboard updates; 5-minute fallback refresh
 
 ## Server-Side Player List
 The scoreboard and HUD use server-side player lists for accurate synchronization:
 - `server.lua` is **required** and must be enabled in `fxmanifest.lua`
 - Server builds and sends the player list on every request
 - Ensures all clients see the same accurate player count
-- Updates every 2 seconds for the HUD and whenever the scoreboard is opened
+ - HUD refreshes on scoreboard updates; 5-minute fallback refresh
 - Player data includes ID and name for each connected player
 - Enhanced with debug logging for troubleshooting
 
