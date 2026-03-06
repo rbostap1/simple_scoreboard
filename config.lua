@@ -57,6 +57,10 @@ Config.BadgerResource = "Badger_Discord_API"
 -- If true, server falls back to identifier matching when Badger is not available.
 Config.EnableDepartmentFallback = true
 
+-- If true, department blips are only shown when a duty script marks the player active.
+-- Use server event `simple_scoreboard:setActiveDepartment` or exports to set/clear duty.
+Config.RequireActiveDepartment = true
+
 -- Department definitions used for scoreboard and HUD "blips".
 -- Put Discord role IDs in roles for each department.
 Config.Departments = {

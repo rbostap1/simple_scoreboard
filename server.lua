@@ -5,6 +5,8 @@
 
 print("[Scoreboard] Server script loading...")
 
+local activeDepartments = {}
+
 local function toLower(value)
     if value == nil then
         return ""
@@ -46,6 +48,48 @@ local function buildDefaultDepartment()
     }
 end
 
+local function findDepartmentByKey(rawKey)
+    if rawKey == nil then
+        return nil
+    end
+
+    local target = toLower(rawKey)
+    local departments = Config.Departments or {}
+    for _, dept in ipairs(departments) do
+        if toLower(dept.key) == target then
+            return {
+                key = dept.key,
+                label = dept.label,
+                shortLabel = dept.shortLabel or dept.label,
+                color = dept.color,
+                icon = dept.icon
+            }
+        end
+    end
+
+    return nil
+end
+
+local function setPlayerActiveDepartment(playerSrc, rawKey)
+    local playerId = tonumber(playerSrc)
+    if not playerId then
+        return false
+    end
+
+    if rawKey == nil or rawKey == false or rawKey == "" then
+        activeDepartments[playerId] = nil
+        return true
+    end
+
+    local department = findDepartmentByKey(rawKey)
+    if not department then
+        return false
+    end
+
+    activeDepartments[playerId] = department
+    return true
+end
+
 local function tryGetBadgerRoles(playerSrc)
     if Config.EnableBadgerApi == false then
         return nil
@@ -84,6 +128,12 @@ end
 
 local function resolveDepartment(playerSrc, playerName)
     local defaultDept = buildDefaultDepartment()
+
+    -- Active-only mode: show a department blip only if explicitly set by a duty script.
+    if Config.RequireActiveDepartment ~= false then
+        return activeDepartments[playerSrc] or defaultDept
+    end
+
     local departments = Config.Departments or {}
 
     if type(departments) ~= "table" or #departments == 0 then
@@ -140,6 +190,33 @@ local function resolveDepartment(playerSrc, playerName)
 
     return defaultDept
 end
+
+RegisterNetEvent("simple_scoreboard:setActiveDepartment", function(rawKey)
+    local src = source
+    local ok = setPlayerActiveDepartment(src, rawKey)
+    if not ok then
+        print(("[Scoreboard] Invalid active department '%s' for player %s"):format(tostring(rawKey), tostring(src)))
+    end
+
+    -- Prompt clients to request a fresh player list so HUD/scoreboard updates quickly.
+    TriggerClientEvent("simple_scoreboard:refreshNow", -1)
+end)
+
+exports("SetPlayerActiveDepartment", function(playerSrc, departmentKey)
+    local ok = setPlayerActiveDepartment(playerSrc, departmentKey)
+    if ok then
+        TriggerClientEvent("simple_scoreboard:refreshNow", -1)
+    end
+    return ok
+end)
+
+exports("ClearPlayerActiveDepartment", function(playerSrc)
+    local ok = setPlayerActiveDepartment(playerSrc, nil)
+    if ok then
+        TriggerClientEvent("simple_scoreboard:refreshNow", -1)
+    end
+    return ok
+end)
 
 -- Build a fresh player list with id and name for each connected player.
 local function buildPlayerList()
@@ -238,6 +315,7 @@ if Config.EnableCreatorMessage then
     
     AddEventHandler('playerDropped', function(reason)
         local src = source
+        activeDepartments[src] = nil
         local identifiers = GetPlayerIdentifiers(src)
         if identifiers then
             for _, id in ipairs(identifiers) do

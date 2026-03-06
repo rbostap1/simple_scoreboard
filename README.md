@@ -39,6 +39,7 @@ Config.LogoURL = "https://example.com/yourlogo.png"
 Config.EnableBadgerApi = true
 Config.BadgerResource = "Badger_Discord_API"
 Config.EnableDepartmentFallback = true
+Config.RequireActiveDepartment = true
 ```
 
 ### Departments
@@ -79,6 +80,27 @@ Config.DefaultDepartment = {
 - This resource attempts common Badger export names automatically.
 - If `Badger_Discord_API` is not started, it falls back to keyword matching (if enabled).
 - Role matching is based on the role IDs listed in each department's `roles` array.
+
+## Active Department Mode
+When `Config.RequireActiveDepartment = true`, department blips are shown only for players actively set to a department.
+
+If a player is not marked active, they show as your `Config.DefaultDepartment` (for example `N/A`).
+
+Use one of these server-side integrations from your duty script:
+
+```lua
+-- Export API (preferred)
+exports["simple_scoreboard"]:SetPlayerActiveDepartment(source, "police")
+exports["simple_scoreboard"]:ClearPlayerActiveDepartment(source)
+```
+
+Client -> server bridge option:
+
+```lua
+-- from a client duty script
+TriggerServerEvent("simple_scoreboard:setActiveDepartment", "police")
+TriggerServerEvent("simple_scoreboard:setActiveDepartment", nil)
+```
 
 ## Department Blips
 Department data is attached to each player object from the server:
