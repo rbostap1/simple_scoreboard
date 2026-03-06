@@ -3,25 +3,119 @@ let allPlayers = [];
 let maxPlayers = 32;
 let currentPlayerId = null;
 let highlightEnabled = true;
-let highlightColor = "#6495FF";
+let highlightColor = "#E56B1F";
 let logoEnabled = true;
-let colors = {};
 let hudEnabled = false;
+let colors = {};
+
 const playersPerPage = 12;
 
 const hudEl = document.getElementById("playerhud");
 const hudIdEl = document.getElementById("playerhud-id");
 const hudNameEl = document.getElementById("playerhud-name");
 const hudPlayersEl = document.getElementById("playerhud-players");
+const hudDepartmentEl = document.getElementById("playerhud-department");
 
-// Convert hex color to RGB values
 function hexToRgb(hex) {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
+    const normalized = `${hex || ""}`.trim();
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(normalized);
+    if (!result) return null;
+    return {
         r: parseInt(result[1], 16),
         g: parseInt(result[2], 16),
         b: parseInt(result[3], 16)
-    } : null;
+    };
+}
+
+function safeDepartment(dept) {
+    const fallback = {
+        key: "unknown",
+        label: "Unassigned",
+        shortLabel: "N/A",
+        color: "#8A8F98",
+        icon: "dot"
+    };
+
+    if (!dept || typeof dept !== "object") {
+        return fallback;
+    }
+
+    return {
+        key: dept.key || fallback.key,
+        label: dept.label || fallback.label,
+        shortLabel: dept.shortLabel || dept.label || fallback.shortLabel,
+        color: dept.color || fallback.color,
+        icon: dept.icon || fallback.icon
+    };
+}
+
+function iconForDepartment(icon) {
+    const map = {
+        shield: "S",
+        plus: "+",
+        flame: "F",
+        user: "U",
+        dot: "o"
+    };
+
+    return map[icon] || "o";
+}
+
+function applyColorVariables(configColors) {
+    const root = document.documentElement;
+    colors = configColors || {};
+
+    const setColor = (name, value, fallback) => {
+        const target = value || fallback;
+        root.style.setProperty(`--${name}`, target);
+        const rgb = hexToRgb(target);
+        if (rgb) {
+            root.style.setProperty(`--${name}-rgb`, `${rgb.r} ${rgb.g} ${rgb.b}`);
+        }
+    };
+
+    setColor("primary", colors.primary, "#E56B1F");
+    setColor("primary-dark", colors.primaryDark, "#A64619");
+    setColor("text-white", colors.textWhite, "#FAF6E9");
+    setColor("text-accent", colors.textAccent, "#FFC88E");
+    setColor("text-secondary", colors.textSecondary, "#C3B9A8");
+
+    document.documentElement.style.setProperty("--background", colors.background || "rgba(9, 13, 20, 0.94)");
+    document.documentElement.style.setProperty("--background-dark", colors.backgroundDark || "rgba(5, 8, 13, 0.98)");
+    document.documentElement.style.setProperty("--card-bg", colors.cardBg || "rgba(18, 24, 35, 0.82)");
+}
+
+function renderDepartmentSummary() {
+    const summaryEl = document.getElementById("departmentSummary");
+    summaryEl.innerHTML = "";
+
+    if (!Array.isArray(allPlayers) || allPlayers.length === 0) {
+        return;
+    }
+
+    const totals = {};
+    allPlayers.forEach((player) => {
+        const dept = safeDepartment(player.department);
+        const key = dept.key;
+        if (!totals[key]) {
+            totals[key] = {
+                dept,
+                count: 0
+            };
+        }
+        totals[key].count += 1;
+    });
+
+    Object.values(totals)
+        .sort((a, b) => b.count - a.count)
+        .forEach((entry) => {
+            const rgb = hexToRgb(entry.dept.color) || { r: 138, g: 143, b: 152 };
+            const pill = document.createElement("div");
+            pill.className = "dept-pill";
+            pill.style.setProperty("--dept-rgb", `${rgb.r} ${rgb.g} ${rgb.b}`);
+            pill.textContent = `${entry.dept.shortLabel}: ${entry.count}`;
+            summaryEl.appendChild(pill);
+        });
 }
 
 function renderPlayerPage() {
@@ -30,6 +124,7 @@ function renderPlayerPage() {
 
     if (!allPlayers || allPlayers.length === 0) {
         list.innerHTML = "<div class='empty-state'>No players online</div>";
+        document.getElementById("pagination").style.display = "none";
         return;
     }
 
@@ -40,56 +135,54 @@ function renderPlayerPage() {
     pagePlayers.forEach((player, index) => {
         const card = document.createElement("div");
         card.className = "player-card";
-        
-        // Apply highlight to current player if enabled
+
         if (highlightEnabled && player && player.id === currentPlayerId) {
             card.classList.add("current-player");
-            card.style.setProperty("--highlight-color", highlightColor);
         }
-        
+
         const playerId = player && player.id ? player.id : "?";
         const playerName = player && player.name ? player.name : "Unknown";
-        
+        const dept = safeDepartment(player.department);
+        const rgb = hexToRgb(dept.color) || { r: 138, g: 143, b: 152 };
+
         card.innerHTML = `
-            <div class="player-card-header">
-                <div class="player-rank">${startIdx + index + 1}</div>
-                <div class="player-badge">${playerId}</div>
+            <div class="player-top">
+                <div class="player-index">#${startIdx + index + 1}</div>
+                <div class="player-id">ID ${playerId}</div>
             </div>
-            <div class="player-card-body">
-                <div class="player-name">${playerName}</div>
+            <div class="player-name">${playerName}</div>
+            <div class="dept-badge" style="--dept-rgb:${rgb.r} ${rgb.g} ${rgb.b}">
+                <span class="dept-dot"></span>
+                <span>${iconForDepartment(dept.icon)} ${dept.shortLabel}</span>
             </div>
         `;
+
         list.appendChild(card);
     });
 
-    // Update pagination buttons
-    const totalPages = Math.ceil(allPlayers.length / playersPerPage);
+    const totalPages = Math.max(1, Math.ceil(allPlayers.length / playersPerPage));
     document.getElementById("prevPage").disabled = currentPage === 1;
     document.getElementById("nextPage").disabled = currentPage === totalPages;
     document.getElementById("pageIndicator").textContent = `Page ${currentPage} / ${totalPages}`;
-
-    // Hide pagination if only one page
-    const pagination = document.getElementById("pagination");
-    pagination.style.display = totalPages > 1 ? "flex" : "none";
+    document.getElementById("pagination").style.display = totalPages > 1 ? "flex" : "none";
 }
 
-// Pagination button handlers
 document.getElementById("prevPage").addEventListener("click", () => {
     if (currentPage > 1) {
-        currentPage--;
+        currentPage -= 1;
         renderPlayerPage();
     }
 });
 
 document.getElementById("nextPage").addEventListener("click", () => {
-    const totalPages = Math.ceil(allPlayers.length / playersPerPage);
+    const totalPages = Math.max(1, Math.ceil(allPlayers.length / playersPerPage));
     if (currentPage < totalPages) {
-        currentPage++;
+        currentPage += 1;
         renderPlayerPage();
     }
 });
 
-window.addEventListener("message", function (event) {
+window.addEventListener("message", (event) => {
     const data = event.data;
 
     if (data.action === "toggle") {
@@ -100,111 +193,59 @@ window.addEventListener("message", function (event) {
     if (data.action === "config") {
         const nameEl = document.getElementById("servername");
         const logoEl = document.getElementById("logo");
-        const headerFirstChild = document.getElementById("header").querySelector("div:first-child");
+        const logoFallback = document.getElementById("logoFallback");
         const root = document.documentElement;
 
         if (data.serverName) {
             nameEl.textContent = data.serverName;
         }
 
-        // Store logo enabled setting
         if (data.logoEnabled !== undefined) {
-            logoEnabled = data.logoEnabled;
+            logoEnabled = !!data.logoEnabled;
         }
 
-        // Handle logo display and spacing
         if (logoEnabled && data.logo && data.logo !== "") {
             logoEl.src = data.logo;
             logoEl.style.display = "block";
-            headerFirstChild.classList.remove("no-logo");
+            logoFallback.style.display = "none";
         } else {
             logoEl.style.display = "none";
-            headerFirstChild.classList.add("no-logo");
+            logoFallback.style.display = "grid";
         }
 
-        // Store max players from config
         if (data.maxPlayers) {
             maxPlayers = data.maxPlayers;
         }
-        
-        // Store highlight settings from config
+
         if (data.highlightEnabled !== undefined) {
-            highlightEnabled = data.highlightEnabled;
+            highlightEnabled = !!data.highlightEnabled;
         }
-        
+
         if (data.highlightColor) {
             highlightColor = data.highlightColor;
-            // Apply highlight color as CSS variable
             root.style.setProperty("--highlight-color", highlightColor);
-            // Convert and set RGB values
             const rgb = hexToRgb(highlightColor);
             if (rgb) {
                 root.style.setProperty("--highlight-color-rgb", `${rgb.r} ${rgb.g} ${rgb.b}`);
             }
         }
-        
-        // Store and apply colors from config
-        if (data.colors && Object.keys(data.colors).length > 0) {
-            colors = data.colors;
-            
-            // Helper function to set color and RGB variables
-            const setColorVar = (varName, colorValue, defaultValue) => {
-                const color = colorValue || defaultValue;
-                root.style.setProperty(`--${varName}`, color);
-                const rgb = hexToRgb(color);
-                if (rgb) {
-                    root.style.setProperty(`--${varName}-rgb`, `${rgb.r} ${rgb.g} ${rgb.b}`);
-                }
-            };
-            
-            // Apply colors as CSS variables
-            setColorVar("primary", colors.primary, "#6495FF");
-            setColorVar("primary-dark", colors.primaryDark, "#4A6FA5");
-            setColorVar("text-white", colors.textWhite, "#FFFFFF");
-            setColorVar("text-accent", colors.textAccent, "#A0B5FF");
-            setColorVar("text-secondary", colors.textSecondary, "#8B9DC3");
-            setColorVar("border", colors.border, "#FFFFFF");
-            setColorVar("header-border", colors.headerBorder, "#6495FF");
-            setColorVar("player-row", colors.playerRow, "#FFFFFF");
-            setColorVar("player-count-bg", colors.playerCountBg, "#6495FF");
-            setColorVar("player-count-border", colors.playerCountBorder, "#6495FF");
-            setColorVar("hover-bg", colors.hoverBg, "#6495FF");
-            setColorVar("hover-bg-dark", colors.hoverBgDark, "#5078C8");
-            setColorVar("logo-glow", colors.logoGlow, "#6495FF");
-            
-            // Handle background and shadow colors (they include opacity in the value)
-            root.style.setProperty("--background", colors.background || "rgba(18, 18, 35, 0.95)");
-            root.style.setProperty("--background-dark", colors.backgroundDark || "rgba(12, 12, 25, 0.98)");
-            root.style.setProperty("--card-bg", colors.cardBg || "rgba(25, 25, 45, 0.6)");
-            root.style.setProperty("--shadow-color", colors.shadowColor || "rgba(0, 0, 0, 0.3)");
-            root.style.setProperty("--shadow-strong", colors.shadowStrong || "rgba(0, 0, 0, 0.5)");
-            
-            // Set opacity values
-            root.style.setProperty("--border-opacity", colors.borderOpacity ?? 0.08);
-            root.style.setProperty("--header-border-opacity", colors.headerBorderOpacity ?? 0.5);
-            root.style.setProperty("--player-row-light-opacity", colors.playerRowLightOpacity ?? 0.04);
-            root.style.setProperty("--player-row-dark-opacity", colors.playerRowDarkOpacity ?? 0.06);
-            root.style.setProperty("--player-count-bg-opacity", colors.playerCountBgOpacity ?? 0.2);
-            root.style.setProperty("--player-count-border-opacity", colors.playerCountBorderOpacity ?? 0.4);
-            root.style.setProperty("--hover-bg-opacity", colors.hoverBgOpacity ?? 0.2);
-            root.style.setProperty("--hover-bg-dark-opacity", colors.hoverBgDarkOpacity ?? 0.2);
-            root.style.setProperty("--logo-glow-opacity", colors.logoGlowOpacity ?? 0.4);
-            root.style.setProperty("--logo-glow-size", colors.logoGlowSize || "25px");
+
+        if (data.colors && typeof data.colors === "object") {
+            applyColorVariables(data.colors);
         }
     }
 
     if (data.action === "hudConfig" && data.hud) {
-        const root = document.documentElement;
         hudEnabled = !!data.hud.enabled;
 
         if (data.hud.backgroundColor) {
-            root.style.setProperty("--hud-bg", data.hud.backgroundColor);
+            document.documentElement.style.setProperty("--hud-bg", data.hud.backgroundColor);
         }
         if (data.hud.borderColor) {
-            root.style.setProperty("--hud-border", data.hud.borderColor);
+            document.documentElement.style.setProperty("--hud-border", data.hud.borderColor);
         }
         if (data.hud.textColor) {
-            root.style.setProperty("--hud-text", data.hud.textColor);
+            document.documentElement.style.setProperty("--hud-text", data.hud.textColor);
         }
 
         hudEl.style.display = hudEnabled ? "flex" : "none";
@@ -217,13 +258,24 @@ window.addEventListener("message", function (event) {
 
     if (data.action === "hudUpdate") {
         if (data.playerId !== undefined && hudIdEl) {
-            hudIdEl.textContent = `ID: ${data.playerId}`;
+            hudIdEl.textContent = `# ${data.playerId}`;
         }
+
         if (data.playerName && hudNameEl) {
             hudNameEl.textContent = data.playerName;
         }
+
         if (data.playerCount !== undefined && data.maxPlayers !== undefined && hudPlayersEl) {
-            hudPlayersEl.textContent = `Players: ${data.playerCount} / ${data.maxPlayers}`;
+            hudPlayersEl.textContent = `${data.playerCount} / ${data.maxPlayers} online`;
+        }
+
+        if (hudDepartmentEl) {
+            const dept = safeDepartment(data.department);
+            const rgb = hexToRgb(dept.color) || { r: 138, g: 143, b: 152 };
+            hudDepartmentEl.textContent = dept.shortLabel;
+            hudDepartmentEl.style.setProperty("--dept-color", dept.color);
+            hudDepartmentEl.style.backgroundColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`;
+            hudDepartmentEl.style.borderColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.55)`;
         }
 
         if (hudEnabled) {
@@ -232,24 +284,20 @@ window.addEventListener("message", function (event) {
     }
 
     if (data.action === "update") {
-        console.log("[Scoreboard] NUI received update message", data);
         if (!Array.isArray(data.players)) {
-            console.error("[Scoreboard] NUI: Players data is not an array", data.players);
             return;
         }
 
         allPlayers = data.players;
-        console.log("[Scoreboard] NUI: Player count:", allPlayers.length);
-        currentPage = 1; // Reset to first page
-        
-        // Store current player ID if provided
+        currentPage = 1;
+
         if (data.currentPlayerId !== undefined) {
             currentPlayerId = data.currentPlayerId;
         }
-        
+
+        renderDepartmentSummary();
         renderPlayerPage();
 
-        // Update player count dynamically with configured max players
         const playerCount = document.getElementById("playercount");
         playerCount.textContent = `${allPlayers.length} / ${maxPlayers}`;
     }

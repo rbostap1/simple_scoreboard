@@ -2,43 +2,52 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="playerhud" class="hud hidden">
-        <div id="playerhud-id">ID: --</div>
-        <div id="playerhud-name">Name: --</div>
-        <div id="playerhud-players">Players: 0 / 32</div>
+        <div class="hud-row">
+            <span id="playerhud-id" class="hud-id"># --</span>
+            <span id="playerhud-department" class="hud-dept" style="--dept-color:#8A8F98;">N/A</span>
+        </div>
+        <div id="playerhud-name" class="hud-name">Unknown Player</div>
+        <div id="playerhud-players" class="hud-count">0 / 32 online</div>
     </div>
 
     <div id="scoreboard">
-        <div id="header" class="sb-hero">
-            <div class="sb-hero-main">
-                <div class="sb-logo-wrap">
-                    <img id="logo" src="" alt="Logo" style="display:none;">
+        <div class="panel-backdrop"></div>
+        <div id="header" class="score-header">
+            <div class="header-main">
+                <div class="logo-capsule">
+                    <img id="logo" src="" alt="Server logo" style="display:none;">
+                    <div id="logoFallback" class="logo-fallback">SB</div>
                 </div>
-                <div class="sb-title">
-                    <span class="sb-kicker">Live Roster</span>
-                    <div id="servername">Server Name</div>
+                <div class="title-wrap">
+                    <div class="eyebrow">Active Units</div>
+                    <div id="servername" class="server-name">Server Name</div>
                 </div>
             </div>
-            <div class="sb-hero-meta">
-                <div id="playercount" class="sb-pill">0 / 32</div>
-                <div class="sb-meta-text">Players online</div>
+            <div class="header-meta">
+                <div id="playercount" class="count-chip">0 / 32</div>
+                <div class="meta-label">Connected</div>
             </div>
         </div>
 
-        <div class="sb-divider"></div>
+        <div class="department-strip" id="departmentSummary"></div>
 
-        <div class="sb-players-container">
+        <div class="players-shell">
             <div id="playerlist" class="players-grid">
             </div>
         </div>
 
         <div id="pagination" class="pagination-modern">
-            <button id="prevPage" class="page-btn">← Previous</button>
-            <span id="pageIndicator">Page 1</span>
-            <button id="nextPage" class="page-btn">Next →</button>
+            <button id="prevPage" class="page-btn" type="button">Prev</button>
+            <span id="pageIndicator">Page 1 / 1</span>
+            <button id="nextPage" class="page-btn" type="button">Next</button>
         </div>
     </div>
 

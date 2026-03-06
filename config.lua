@@ -4,96 +4,158 @@
 
 Config = {}
 
--- 🏷 Your server name (shown at top of scoreboard)
+-- Your server name (shown at top of scoreboard)
 Config.ServerName = "YOUR SERVER NAME HERE"
 
--- 🖼 Enable or disable the logo display
+-- Enable or disable the logo display
 Config.EnableLogo = true
 
--- 🖼 Logo URL (PNG/JPG). Can be a Discord CDN, Imgur, or your own web host.
+-- Logo URL (PNG/JPG). Can be a Discord CDN, Imgur, or your own web host.
 -- Only used if EnableLogo is set to true.
 Config.LogoURL = "https://example.com/yourlogo.png"
 
--- ⌨️ Default keybind to open scoreboard (players can still change it in GTA settings)
+-- Default keybind to open scoreboard (players can still change it in GTA settings)
 -- Use keys like: F9, F10, HOME, INSERT, etc.
 Config.ToggleKey = "F9"
 
--- 👥 Maximum player capacity for your server
+-- Maximum player capacity for your server
 Config.MaxPlayers = 32
 
--- 🏄 Highlight current player in scoreboard
+-- Highlight current player in scoreboard
 Config.HighlightCurrentPlayer = true
 
--- 🎨 Color for current player highlight (use hex color code)
-Config.HighlightColor = "#6495FF"
+-- Color for current player highlight (use hex color code)
+Config.HighlightColor = "#E56B1F"
 
--- 👤 Player HUD toggle (bottom-right) to show player's name + ID
--- Note: HUD displays as minimal text elements without background box or borders
+-- Player HUD toggle (bottom-right) to show local player summary
 Config.EnablePlayerHud = true
 
--- 🎨 HUD colors (only text colors are used, no background or border)
+-- HUD colors
 Config.HudColors = {
-    text = "#FFFFFF",                 -- Text color for HUD labels
-    border = "#6495FF"                -- Accent color for player count and ID
+    text = "#FAF6E9",                     -- Main HUD text
+    background = "rgba(10, 14, 22, 0.88)", -- HUD card background
+    border = "#E56B1F"                    -- Accent color for badges and outlines
 }
 
--- 🎉 Creator Join Message
-Config.EnableCreatorMessage = true    -- Enable/disable creator join message
-Config.CreatorIdentifier = "license:YOUR_LICENSE_HERE"  -- Your license identifier
-Config.CreatorMessageSender = "^5simple_scoreboard^0"  -- Name that appears before the message (supports color codes)
-Config.CreatorMessage = "^3The script creator/editor ^2NAME HERE ^3has joined the server!^0"  -- Message to display
+-- Optional creator join message
+Config.EnableCreatorMessage = true
+Config.CreatorIdentifier = "license:YOUR_LICENSE_HERE"
+Config.CreatorMessageSender = "^5simple_scoreboard^0"
+Config.CreatorMessage = "^3The script creator/editor ^2NAME HERE ^3has joined the server!^0"
 
 -----------------------------------
---       COLOR SETTINGS          --
+--      BADGER API SETTINGS      --
 -----------------------------------
 
--- 🎨 Comprehensive color and design customization
+-- Enables department lookup from Badger API role data.
+-- This integration is optional and safe to leave enabled.
+Config.EnableBadgerApi = true
+
+-- Badger Discord API resource name.
+Config.BadgerResource = "Badger_Discord_API"
+
+-- If true, server falls back to identifier matching when Badger is not available.
+Config.EnableDepartmentFallback = true
+
+-- Department definitions used for scoreboard and HUD "blips".
+-- Put Discord role IDs in roles for each department.
+Config.Departments = {
+    {
+        key = "police",
+        label = "Law Enforcement",
+        shortLabel = "LEO",
+        color = "#3A86FF",
+        icon = "shield",
+        roles = { "ROLE_ID_POLICE" },
+        fallbackKeywords = { "lspd", "sasp", "bcso", "police", "sheriff", "state" }
+    },
+    {
+        key = "ems",
+        label = "Medical",
+        shortLabel = "EMS",
+        color = "#2EC27E",
+        icon = "plus",
+        roles = { "ROLE_ID_EMS" },
+        fallbackKeywords = { "ems", "medic", "doctor", "ambulance" }
+    },
+    {
+        key = "fire",
+        label = "Fire",
+        shortLabel = "FIRE",
+        color = "#F76C5E",
+        icon = "flame",
+        roles = { "ROLE_ID_FIRE" },
+        fallbackKeywords = { "fire", "fd", "firefighter" }
+    },
+    {
+        key = "civ",
+        label = "Civilian",
+        shortLabel = "CIV",
+        color = "#B8A168",
+        icon = "user",
+        roles = { "ROLE_ID_CIV" },
+        fallbackKeywords = { "civ", "civilian" }
+    }
+}
+
+-- Default department when no match is found.
+Config.DefaultDepartment = {
+    key = "unknown",
+    label = "Unassigned",
+    shortLabel = "N/A",
+    color = "#8A8F98",
+    icon = "dot"
+}
+
+-----------------------------------
+--         COLOR SETTINGS        --
+-----------------------------------
+
 Config.Colors = {
-    -- Primary colors
-    primary = "#6495FF",           -- Primary accent color (buttons, highlights, borders)
-    primaryDark = "#4A6FA5",       -- Darker variant for gradients
-    
+    -- Main palette
+    primary = "#E56B1F",
+    primaryDark = "#A64619",
+    secondary = "#1A2E45",
+
     -- Text colors
-    textWhite = "#FFFFFF",         -- Main text color
-    textAccent = "#A0B5FF",        -- Accent text (IDs, headers)
-    textSecondary = "#8B9DC3",     -- Secondary text elements
-    
-    -- Background colors
-    background = "rgba(18, 18, 35, 0.95)",      -- Main scoreboard background
-    backgroundDark = "rgba(12, 12, 25, 0.98)",  -- Darker background gradient
-    cardBg = "rgba(25, 25, 45, 0.6)",           -- Card/container backgrounds
-    
-    -- Border settings
-    border = "#FFFFFF",            -- Border color
-    borderOpacity = 0.08,          -- Border opacity (0-1)
-    
-    -- Header styling
-    headerBorder = "#6495FF",      -- Header divider color
-    headerBorderOpacity = 0.5,     -- Header border opacity (0-1)
-    
-    -- Player row colors
-    playerRow = "#FFFFFF",         -- Player row base color
-    playerRowLightOpacity = 0.04,  -- Light row opacity (0-1)
-    playerRowDarkOpacity = 0.06,   -- Dark row opacity (0-1)
-    
-    -- Player count badge
-    playerCountBg = "#6495FF",     -- Badge background color
-    playerCountBgOpacity = 0.2,    -- Badge background opacity (0-1)
-    playerCountBorder = "#6495FF", -- Badge border color
-    playerCountBorderOpacity = 0.4,-- Badge border opacity (0-1)
-    
+    textWhite = "#FAF6E9",
+    textAccent = "#FFC88E",
+    textSecondary = "#C3B9A8",
+
+    -- Backgrounds
+    background = "rgba(9, 13, 20, 0.94)",
+    backgroundDark = "rgba(5, 8, 13, 0.98)",
+    cardBg = "rgba(18, 24, 35, 0.82)",
+
+    -- Borders
+    border = "#F1D3A1",
+    borderOpacity = 0.08,
+    headerBorder = "#E56B1F",
+    headerBorderOpacity = 0.45,
+
+    -- Rows/cards
+    playerRow = "#FAF6E9",
+    playerRowLightOpacity = 0.03,
+    playerRowDarkOpacity = 0.08,
+
+    -- Counter badge
+    playerCountBg = "#E56B1F",
+    playerCountBgOpacity = 0.22,
+    playerCountBorder = "#FFC88E",
+    playerCountBorderOpacity = 0.45,
+
     -- Hover effects
-    hoverBg = "#6495FF",           -- Hover background color
-    hoverBgOpacity = 0.2,          -- Hover opacity (0-1)
-    hoverBgDark = "#5078C8",       -- Darker hover gradient
-    hoverBgDarkOpacity = 0.2,      -- Darker hover opacity (0-1)
-    
-    -- Logo effects
-    logoGlow = "#6495FF",          -- Logo glow color
-    logoGlowOpacity = 0.4,         -- Logo glow opacity (0-1)
-    logoGlowSize = "25px",         -- Logo glow spread size
-    
-    -- Shadow colors
-    shadowColor = "rgba(0, 0, 0, 0.3)",      -- Standard shadow
-    shadowStrong = "rgba(0, 0, 0, 0.5)",     -- Strong shadow for emphasis
+    hoverBg = "#E56B1F",
+    hoverBgOpacity = 0.16,
+    hoverBgDark = "#A64619",
+    hoverBgDarkOpacity = 0.18,
+
+    -- Logo glow
+    logoGlow = "#E56B1F",
+    logoGlowOpacity = 0.35,
+    logoGlowSize = "20px",
+
+    -- Shadows
+    shadowColor = "rgba(0, 0, 0, 0.35)",
+    shadowStrong = "rgba(0, 0, 0, 0.62)",
 }

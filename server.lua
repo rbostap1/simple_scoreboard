@@ -5,15 +5,153 @@
 
 print("[Scoreboard] Server script loading...")
 
+local function toLower(value)
+    if value == nil then
+        return ""
+    end
+    return string.lower(tostring(value))
+end
+
+local function getPlayerIdentifierList(playerSrc)
+    local identifiers = GetPlayerIdentifiers(playerSrc)
+    if identifiers and type(identifiers) == "table" then
+        return identifiers
+    end
+    return {}
+end
+
+local function hasRole(roleList, roleId)
+    if type(roleList) ~= "table" or not roleId then
+        return false
+    end
+
+    local target = tostring(roleId)
+    for _, role in pairs(roleList) do
+        if tostring(role) == target then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function buildDefaultDepartment()
+    local d = Config.DefaultDepartment or {}
+    return {
+        key = d.key or "unknown",
+        label = d.label or "Unassigned",
+        shortLabel = d.shortLabel or "N/A",
+        color = d.color or "#8A8F98",
+        icon = d.icon or "dot"
+    }
+end
+
+local function tryGetBadgerRoles(playerSrc)
+    if Config.EnableBadgerApi == false then
+        return nil
+    end
+
+    local resourceName = Config.BadgerResource or "Badger_Discord_API"
+    if GetResourceState(resourceName) ~= "started" then
+        return nil
+    end
+
+    local exportsRef = exports[resourceName]
+    if not exportsRef then
+        return nil
+    end
+
+    -- Badger versions can expose different function names; probe common ones.
+    local probes = {
+        "GetDiscordRoles",
+        "GetDiscordRolesFromSrc",
+        "GetRoles",
+        "GetDiscordRole"
+    }
+
+    for _, fnName in ipairs(probes) do
+        local fn = exportsRef[fnName]
+        if fn then
+            local ok, value = pcall(fn, playerSrc)
+            if ok and type(value) == "table" then
+                return value
+            end
+        end
+    end
+
+    return nil
+end
+
+local function resolveDepartment(playerSrc, playerName)
+    local defaultDept = buildDefaultDepartment()
+    local departments = Config.Departments or {}
+
+    if type(departments) ~= "table" or #departments == 0 then
+        return defaultDept
+    end
+
+    local roles = tryGetBadgerRoles(playerSrc)
+    if roles then
+        for _, dept in ipairs(departments) do
+            if type(dept.roles) == "table" and #dept.roles > 0 then
+                for _, roleId in ipairs(dept.roles) do
+                    if hasRole(roles, roleId) then
+                        return {
+                            key = dept.key or defaultDept.key,
+                            label = dept.label or defaultDept.label,
+                            shortLabel = dept.shortLabel or dept.label or defaultDept.shortLabel,
+                            color = dept.color or defaultDept.color,
+                            icon = dept.icon or defaultDept.icon
+                        }
+                    end
+                end
+            end
+        end
+    end
+
+    if Config.EnableDepartmentFallback == false then
+        return defaultDept
+    end
+
+    local normalizedName = toLower(playerName)
+    local identifiers = getPlayerIdentifierList(playerSrc)
+    local searchable = normalizedName
+    for _, identifier in ipairs(identifiers) do
+        searchable = searchable .. " " .. toLower(identifier)
+    end
+
+    for _, dept in ipairs(departments) do
+        local keywords = dept.fallbackKeywords
+        if type(keywords) == "table" then
+            for _, keyword in ipairs(keywords) do
+                local token = toLower(keyword)
+                if token ~= "" and string.find(searchable, token, 1, true) then
+                    return {
+                        key = dept.key or defaultDept.key,
+                        label = dept.label or defaultDept.label,
+                        shortLabel = dept.shortLabel or dept.label or defaultDept.shortLabel,
+                        color = dept.color or defaultDept.color,
+                        icon = dept.icon or defaultDept.icon
+                    }
+                end
+            end
+        end
+    end
+
+    return defaultDept
+end
+
 -- Build a fresh player list with id and name for each connected player.
 local function buildPlayerList()
     local players = {}
 
     for _, id in ipairs(GetPlayers()) do
         local playerId = tonumber(id)
+        local playerName = GetPlayerName(id) or ("Player " .. playerId)
         table.insert(players, {
             id = playerId,
-            name = GetPlayerName(id) or ("Player " .. playerId)
+            name = playerName,
+            department = resolveDepartment(playerId, playerName)
         })
     end
 
@@ -33,7 +171,9 @@ local function buildConfigPayload()
         highlightEnabled = Config.HighlightCurrentPlayer ~= false,
         highlightColor = Config.HighlightColor or "#6495FF",
 
-        colors = Config.Colors or {}
+        colors = Config.Colors or {},
+        departments = Config.Departments or {},
+        defaultDepartment = buildDefaultDepartment()
     }
 end
 

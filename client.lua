@@ -60,7 +60,9 @@ CreateThread(function()
         maxPlayers = Config.MaxPlayers or 32,
         highlightEnabled = Config.HighlightCurrentPlayer ~= false,
         highlightColor = Config.HighlightColor or "#6495FF",
-        colors = Config.Colors or {}
+        colors = Config.Colors or {},
+        departments = Config.Departments or {},
+        defaultDepartment = Config.DefaultDepartment or {}
     })
 end)
 

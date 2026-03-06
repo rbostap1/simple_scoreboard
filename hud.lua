@@ -14,6 +14,17 @@ local function hudColors()
     }
 end
 
+local function fallbackDepartment()
+    local d = Config.DefaultDepartment or {}
+    return {
+        key = d.key or "unknown",
+        label = d.label or "Unassigned",
+        shortLabel = d.shortLabel or "N/A",
+        color = d.color or "#8A8F98",
+        icon = d.icon or "dot"
+    }
+end
+
 local function sendHudConfig()
     if not hudEnabled() then
         SendNUIMessage({ action = "hudToggle", enabled = false })
@@ -40,13 +51,7 @@ end)
 
 -- Store the latest player count from server
 local latestPlayerCount = 0
-
--- Handle server response with player list
-RegisterNetEvent("simple_scoreboard:updatePlayers", function(players)
-    if players and type(players) == "table" then
-        latestPlayerCount = #players
-    end
-end)
+local latestLocalDepartment = fallbackDepartment()
 
 -- Function to update HUD display
 local function updateHudDisplay()
@@ -56,20 +61,33 @@ local function updateHudDisplay()
         playerId = GetPlayerServerId(player),
         playerName = GetPlayerName(player) or "Player",
         playerCount = latestPlayerCount,
-        maxPlayers = Config.MaxPlayers or 32
+        maxPlayers = Config.MaxPlayers or 32,
+        department = latestLocalDepartment
     })
 end
 
--- Update HUD when scoreboard is refreshed
 RegisterNetEvent("simple_scoreboard:updatePlayers", function(players)
     if players and type(players) == "table" then
         latestPlayerCount = #players
+
+        local myServerId = GetPlayerServerId(PlayerId())
+        local foundDepartment = nil
+
+        for _, player in ipairs(players) do
+            if player and player.id == myServerId then
+                foundDepartment = player.department
+                break
+            end
+        end
+
+        latestLocalDepartment = foundDepartment or fallbackDepartment()
+
         -- Refresh HUD display immediately when scoreboard updates
         if hudEnabled() then
             updateHudDisplay()
         end
     end
-end, true) -- Use override to update both events
+end)
 
 -- Periodically push HUD updates (ID + Name + Player Count)
 -- Refresh every 5 minutes if scoreboard hasn't been updated
