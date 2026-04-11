@@ -48,7 +48,7 @@ Config.BadgerActivityResource = "Badger_PoliceEMSActivity"
 
 -- Chat duty command (Discord role mode only)
 Config.EnableDutyCommand = true
-Config.DutyCommandName = "duty"
+Config.DutyCommandName = "NSduty"
 
 -- Department definitions
 -- Replace ROLE_ID_* values with your real Discord role IDs.
