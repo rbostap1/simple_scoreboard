@@ -2,6 +2,9 @@
 
 Nova Scoreboard is a lightweight FiveM scoreboard resource with a modern NUI, department-aware player cards, and optional Badger integrations for role and duty data.
 
+# Please Note:
+Features in this script are not 100% tested as working, if you find a bug in this script, please feel free to fork the repo and fix the issue.
+
 ## Current Feature Set
 - Modern scoreboard UI with animated player cards and responsive layout.
 - Department badge on each player card (short label + icon token).
@@ -25,7 +28,7 @@ Nova Scoreboard is a lightweight FiveM scoreboard resource with a modern NUI, de
 3. Add an ensure line:
 
 ```cfg
-ensure simple_scoreboard
+ensure Nova_Scoreboard
 ```
 
 4. Configure values in `config.lua`.
