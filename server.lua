@@ -4,7 +4,7 @@ local departmentCache = {}
 local tryGetBadgerRoles
 local missingBadgerRoleExportWarned = false
 local creatorHasJoined = false
-local departmentCacheTtlMs = 5000
+local departmentCacheTtlMillis = 5000
 
 local function toLower(value)
     if value == nil then
@@ -247,6 +247,7 @@ tryGetBadgerRoles = function(playerSrc)
     local attempted = false
 
     for _, fnName in ipairs(probes) do
+        -- Fallback: if resource metadata does not declare exports, probe known names anyway.
         if declaredExports[fnName] or not hasDeclaredExports then
             attempted = true
             local ok, value = callExportSafely(exportsRef, fnName, playerSrc)
@@ -618,14 +619,14 @@ end)
 local function getCachedDepartment(playerId, playerName)
     local now = GetGameTimer()
     local cached = departmentCache[playerId]
-    if cached and cached.expiresAt and cached.expiresAt > now and cached.playerName == playerName then
+    if cached and cached.expiresAt > now and cached.playerName == playerName then
         return cached.department
     end
 
     local department = resolveDepartment(playerId, playerName)
     departmentCache[playerId] = {
         department = department,
-        expiresAt = now + departmentCacheTtlMs,
+        expiresAt = now + departmentCacheTtlMillis,
         playerName = playerName
     }
 
