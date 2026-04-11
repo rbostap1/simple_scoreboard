@@ -217,7 +217,9 @@ window.addEventListener("message", (event) => {
 
     if (data.action === "toggle") {
         const sb = document.getElementById("scoreboard");
-        sb.style.display = data.show ? "block" : "none";
+        const isOpen = !!data.show;
+        sb.style.display = isOpen ? "block" : "none";
+        document.body.classList.toggle("scoreboard-open", isOpen);
     }
 
     if (data.action === "config") {

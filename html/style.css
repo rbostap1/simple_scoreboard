@@ -36,6 +36,10 @@ body {
     overflow: hidden;
     font-family: "Rajdhani", "Segoe UI", sans-serif;
     color: var(--text-main);
+    background: transparent;
+}
+
+body.scoreboard-open {
     background:
         radial-gradient(circle at 14% 18%, rgba(229, 107, 31, 0.15), transparent 24%),
         radial-gradient(circle at 82% 20%, rgba(58, 134, 255, 0.14), transparent 22%),
@@ -50,14 +54,23 @@ body::before {
         linear-gradient(transparent 0 97%, rgba(255, 255, 255, 0.035) 97% 100%),
         linear-gradient(90deg, transparent 0 97%, rgba(255, 255, 255, 0.03) 97% 100%);
     background-size: 100% 22px, 22px 100%;
-    opacity: 0.42;
+    opacity: 0;
     pointer-events: none;
+}
+
+body.scoreboard-open::before {
+    opacity: 0.42;
 }
 
 .scene-shell {
     position: relative;
     width: 100%;
     height: 100%;
+    display: none;
+}
+
+body.scoreboard-open .scene-shell {
+    display: block;
 }
 
 .scene-grid {
@@ -428,7 +441,7 @@ body::before {
 }
 
 .player-card.current-player {
-    border-color: rgba(var(--highlight-color-rgb), 0.72);
+    border-color: transparent;
     background:
         linear-gradient(180deg, rgba(var(--highlight-color-rgb), 0.2), rgba(255, 255, 255, 0.04)),
         rgba(18, 24, 36, 0.96);

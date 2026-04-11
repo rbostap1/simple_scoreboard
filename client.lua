@@ -103,15 +103,7 @@ end)
 
 -- Force a data refresh when server-side duty/department state changes.
 RegisterNetEvent("simple_scoreboard:refreshNow", function()
-    updateScoreboard()
-end)
-
--- Refresh player list while scoreboard is open
-CreateThread(function()
-    while true do
-        Wait(1000)
-        if scoreboardOpen then
-            updateScoreboard()
-        end
+    if scoreboardOpen then
+        updateScoreboard()
     end
 end)
