@@ -429,12 +429,14 @@ RegisterNetEvent("nova_scoreboard:setActiveDepartment", function(rawKey)
         requested = rawKey.key or rawKey.departmentKey or rawKey.department or rawKey.name
     end
 
-    if hasDepartmentSelectionValue(requested) and requested ~= true and type(requested) ~= "string" then
+    local hasDepartmentRequest = hasDepartmentSelectionValue(requested) and requested ~= true
+
+    if hasDepartmentRequest and type(requested) ~= "string" then
         print(("[Scoreboard] Rejected invalid active department payload type '%s' from player %s"):format(type(requested), tostring(src)))
         return
     end
 
-    if hasDepartmentSelectionValue(requested) and requested ~= true then
+    if hasDepartmentRequest then
         local requestedDepartment = findDepartmentByKey(requested)
         if not requestedDepartment or not playerCanUseDepartment(src, requestedDepartment.key) then
             print(("[Scoreboard] Unauthorized active department '%s' from player %s"):format(tostring(requested), tostring(src)))
@@ -472,12 +474,14 @@ local function registerDutyBridgeEvent(eventName, isActive)
                 requested = requested.key or requested.departmentKey or requested.department or requested.name
             end
 
-            if hasDepartmentSelectionValue(requested) and requested ~= true and type(requested) ~= "string" then
+            local hasDepartmentRequest = hasDepartmentSelectionValue(requested) and requested ~= true
+
+            if hasDepartmentRequest and type(requested) ~= "string" then
                 print(("[Scoreboard] Rejected invalid duty bridge payload type '%s' from '%s' for player %s"):format(type(requested), eventName, tostring(src)))
                 return
             end
 
-            if hasDepartmentSelectionValue(requested) and requested ~= true then
+            if hasDepartmentRequest then
                 local requestedDepartment = findDepartmentByKey(requested)
                 if not requestedDepartment or not playerCanUseDepartment(src, requestedDepartment.key) then
                     print(("[Scoreboard] Rejected unauthorized duty bridge department '%s' from '%s' for player %s"):format(tostring(requested), eventName, tostring(src)))
