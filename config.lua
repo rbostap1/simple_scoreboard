@@ -1,62 +1,48 @@
------------------------------------
---       SIMPLE SCOREBOARD       --
------------------------------------
+--------------------------------------
+---  Nova Scoreboard Configuration ---
+--------------------------------------
 
 Config = {}
 
--- Your server name (shown at top of scoreboard)
-Config.ServerName = "YOUR SERVER NAME HERE"
-
--- Enable or disable the logo display
+-- Basic settings
+Config.ServerName = "Nova Scoreboard"
 Config.EnableLogo = true
-
--- Logo URL (PNG/JPG). Can be a Discord CDN, Imgur, or your own web host.
--- Only used if EnableLogo is set to true.
+-- Used only when EnableLogo is true.
 Config.LogoURL = "https://example.com/yourlogo.png"
-
--- Default keybind to open scoreboard (players can still change it in GTA settings)
--- Use keys like: F9, F10, HOME, INSERT, etc.
+-- Default keybind (players can still remap this in GTA settings).
 Config.ToggleKey = "F9"
-
--- Maximum player capacity for your server
 Config.MaxPlayers = 32
-
--- Highlight current player in scoreboard
 Config.HighlightCurrentPlayer = true
-
--- Color for current player highlight (use hex color code)
+-- Hex color used when HighlightCurrentPlayer is true.
 Config.HighlightColor = "#E56B1F"
 
 -- Optional creator join message
+-- Set CreatorIdentifier to a real identifier (for example: license:abc123...).
 Config.EnableCreatorMessage = true
 Config.CreatorIdentifier = "license:YOUR_LICENSE_HERE"
-Config.CreatorMessageSender = "^5simple_scoreboard^0"
+Config.CreatorMessageSender = "^5Nova Scoreboard^0"
 Config.CreatorMessage = "^3The script creator/editor ^2NAME HERE ^3has joined the server!^0"
 
------------------------------------
---      BADGER API SETTINGS      --
------------------------------------
+-- Department integration settings
 
--- Enables department lookup from Badger API role data.
--- This integration is optional and safe to leave enabled.
+-- Enable role lookup via Badger_Discord_API.
 Config.EnableBadgerApi = true
-
--- Badger Discord API resource name.
 Config.BadgerResource = "Badger_Discord_API"
 
--- If true, server falls back to identifier matching when Badger is not available.
+-- If true, use fallback keyword matching when Badger data is unavailable.
 Config.EnableDepartmentFallback = true
 
--- If true, department blips are only shown when a duty script marks the player active.
--- Use server event `simple_scoreboard:setActiveDepartment` or exports to set/clear duty.
+-- If true, departments only show when player is marked active/on-duty.
+-- Set this from your duty script using:
+-- TriggerServerEvent("nova_scoreboard:setActiveDepartment", "police")
+-- TriggerServerEvent("nova_scoreboard:setActiveDepartment", nil)
 Config.RequireActiveDepartment = true
 
--- Optional Badger Police/EMS Activity resource name used for duty-state lookups.
--- The script can expose duty state via exports or call the simple_scoreboard duty bridge events.
+-- Optional duty-state resource used for automatic active department checks.
 Config.BadgerActivityResource = "Badger_PoliceEMSActivity"
 
--- Department definitions used for scoreboard and HUD "blips".
--- Put Discord role IDs in roles for each department.
+-- Department definitions
+-- Replace ROLE_ID_* values with your real Discord role IDs.
 Config.Departments = {
     {
         key = "police",
@@ -96,7 +82,7 @@ Config.Departments = {
     }
 }
 
--- Default department when no match is found.
+-- Default department when no role/keyword/activity match is found.
 Config.DefaultDepartment = {
     key = "civ",
     label = "Civilian",
@@ -105,10 +91,7 @@ Config.DefaultDepartment = {
     icon = "user"
 }
 
------------------------------------
---         COLOR SETTINGS        --
------------------------------------
-
+-- UI colors
 Config.Colors = {
     -- Main palette
     primary = "#E56B1F",

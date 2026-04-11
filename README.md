@@ -1,4 +1,4 @@
-# Simple Scoreboard
+# Nova Scoreboard
 
 A lightweight FiveM scoreboard with a full visual redesign, optional Badger API integration, and department blips for each player.
 
@@ -22,7 +22,7 @@ A lightweight FiveM scoreboard with a full visual redesign, optional Badger API 
 2. Add this to `server.cfg`:
 
 ```cfg
-ensure simple_scoreboard
+ensure nova_scoreboard
 ```
 
 3. Configure `config.lua`.
@@ -32,7 +32,7 @@ ensure simple_scoreboard
 
 ### Basic
 ```lua
-Config.ServerName = "YOUR SERVER NAME HERE"
+Config.ServerName = "Nova Scoreboard"
 Config.ToggleKey = "F9"
 Config.MaxPlayers = 32
 Config.EnableLogo = true
@@ -98,16 +98,16 @@ Use one of these server-side integrations from your duty script:
 
 ```lua
 -- Export API (preferred)
-exports["simple_scoreboard"]:SetPlayerActiveDepartment(source, "police")
-exports["simple_scoreboard"]:ClearPlayerActiveDepartment(source)
+exports["nova_scoreboard"]:SetPlayerActiveDepartment(source, "police")
+exports["nova_scoreboard"]:ClearPlayerActiveDepartment(source)
 ```
 
 Client -> server bridge option:
 
 ```lua
 -- from a client duty script
-TriggerServerEvent("simple_scoreboard:setActiveDepartment", "police")
-TriggerServerEvent("simple_scoreboard:setActiveDepartment", nil)
+TriggerServerEvent("nova_scoreboard:setActiveDepartment", "police")
+TriggerServerEvent("nova_scoreboard:setActiveDepartment", nil)
 ```
 
 ## Department Blips

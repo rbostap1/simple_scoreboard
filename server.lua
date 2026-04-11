@@ -1,10 +1,3 @@
--- server.lua
--- Optional server-side scoreboard provider. The default client script builds the
--- player list locally, but if you uncomment this file in fxmanifest.lua you can
--- serve both player data and the full config directly from the server.
-
-print("[Scoreboard] Server script loading...")
-
 local activeDepartments = {}
 
 local function toLower(value)
@@ -119,7 +112,6 @@ local function tryGetBadgerRoles(playerSrc)
         return nil
     end
 
-    -- Badger versions can expose different function names; probe common ones.
     local probes = {
         "GetDiscordRoles",
         "GetDiscordRolesFromSrc",
@@ -306,15 +298,14 @@ local function resolveDepartment(playerSrc, playerName)
     return resolveDepartmentFromRoles(playerSrc, playerName)
 end
 
-RegisterNetEvent("simple_scoreboard:setActiveDepartment", function(rawKey)
+RegisterNetEvent("nova_scoreboard:setActiveDepartment", function(rawKey)
     local src = source
     local ok = setPlayerActiveDepartment(src, rawKey)
     if not ok then
         print(("[Scoreboard] Invalid active department '%s' for player %s"):format(tostring(rawKey), tostring(src)))
     end
 
-    -- Prompt clients to request a fresh player list so HUD/scoreboard updates quickly.
-    TriggerClientEvent("simple_scoreboard:refreshNow", -1)
+    TriggerClientEvent("nova_scoreboard:refreshNow", -1)
 end)
 
 local function registerDutyBridgeEvent(eventName, isActive)
@@ -328,7 +319,7 @@ local function registerDutyBridgeEvent(eventName, isActive)
             activeDepartments[src] = nil
         end
 
-        TriggerClientEvent("simple_scoreboard:refreshNow", -1)
+        TriggerClientEvent("nova_scoreboard:refreshNow", -1)
     end)
 end
 
@@ -360,7 +351,7 @@ end
 exports("SetPlayerActiveDepartment", function(playerSrc, departmentKey)
     local ok = setPlayerActiveDepartment(playerSrc, departmentKey)
     if ok then
-        TriggerClientEvent("simple_scoreboard:refreshNow", -1)
+        TriggerClientEvent("nova_scoreboard:refreshNow", -1)
     end
     return ok
 end)
@@ -368,12 +359,11 @@ end)
 exports("ClearPlayerActiveDepartment", function(playerSrc)
     local ok = setPlayerActiveDepartment(playerSrc, nil)
     if ok then
-        TriggerClientEvent("simple_scoreboard:refreshNow", -1)
+        TriggerClientEvent("nova_scoreboard:refreshNow", -1)
     end
     return ok
 end)
 
--- Build a fresh player list with id and name for each connected player.
 local function buildPlayerList()
     local players = {}
 
@@ -390,10 +380,9 @@ local function buildPlayerList()
     return players
 end
 
--- Pack every scoreboard display option so clients don't need to hardcode them.
 local function buildConfigPayload()
     return {
-        serverName = Config.ServerName or "YOUR SERVER NAME HERE",
+        serverName = Config.ServerName or "Nova Scoreboard",
         toggleKey = Config.ToggleKey or "F9",
         maxPlayers = Config.MaxPlayers or 32,
 
@@ -409,57 +398,43 @@ local function buildConfigPayload()
     }
 end
 
--- Return only the player list (client will still use its own config).
-RegisterNetEvent("simple_scoreboard:requestPlayers", function()
+RegisterNetEvent("nova_scoreboard:requestPlayers", function()
     local src = source
     local playerList = buildPlayerList()
-    print("[Scoreboard] Server received player request from player " .. src)
-    print("[Scoreboard] Sending " .. #playerList .. " players to client")
-    print("[Scoreboard] Player data: " .. json.encode(playerList))
-    TriggerClientEvent("simple_scoreboard:updatePlayers", src, playerList)
+    TriggerClientEvent("nova_scoreboard:updatePlayers", src, playerList)
 end)
 
--- Return just the config so the UI can mirror server settings.
-RegisterNetEvent("simple_scoreboard:requestConfig", function()
+RegisterNetEvent("nova_scoreboard:requestConfig", function()
     local src = source
-    TriggerClientEvent("simple_scoreboard:updateConfig", src, buildConfigPayload())
+    TriggerClientEvent("nova_scoreboard:updateConfig", src, buildConfigPayload())
 end)
 
--- Return both player data and config together for one-stop syncing.
-RegisterNetEvent("simple_scoreboard:requestScoreboardData", function()
+RegisterNetEvent("nova_scoreboard:requestScoreboardData", function()
     local src = source
-    TriggerClientEvent("simple_scoreboard:updateScoreboardData", src, {
+    TriggerClientEvent("nova_scoreboard:updateScoreboardData", src, {
         players = buildPlayerList(),
         config = buildConfigPayload()
     })
 end)
 
-print("[Scoreboard] Server script loaded successfully!")
-print("[Scoreboard] Registered event handlers for player list requests")
-
--- Creator Join Message
 local creatorHasJoined = false
 
 if Config.EnableCreatorMessage then
-    AddEventHandler('playerJoining', function(oldId)
+    AddEventHandler('playerJoining', function(_)
         local src = source
-        
-        -- Wait a bit for identifiers to be fully loaded
+
         SetTimeout(1000, function()
             local identifiers = GetPlayerIdentifiers(src)
-            
+
             if identifiers then
                 for _, id in ipairs(identifiers) do
                     if id == Config.CreatorIdentifier then
                         if not creatorHasJoined then
                             creatorHasJoined = true
-                            
-                            -- Broadcast the message to all players
+
                             TriggerClientEvent('chat:addMessage', -1, {
-                                args = { Config.CreatorMessageSender or "^5simple_scoreboard^0", Config.CreatorMessage }
+                                args = { Config.CreatorMessageSender or "^5Nova Scoreboard^0", Config.CreatorMessage }
                             })
-                            
-                            print("[Scoreboard] Creator joined the server!")
                         end
                         break
                     end
@@ -468,7 +443,7 @@ if Config.EnableCreatorMessage then
         end)
     end)
     
-    AddEventHandler('playerDropped', function(reason)
+    AddEventHandler('playerDropped', function(_)
         local src = source
         activeDepartments[src] = nil
         local identifiers = GetPlayerIdentifiers(src)
@@ -476,12 +451,9 @@ if Config.EnableCreatorMessage then
             for _, id in ipairs(identifiers) do
                 if id == Config.CreatorIdentifier then
                     creatorHasJoined = false
-                    print("[Scoreboard] Creator left the server")
                     break
                 end
             end
         end
     end)
-    
-    print("[Scoreboard] Creator join message enabled")
 end
