@@ -1,7 +1,10 @@
 local activeDepartments = {}
 local dutySelections = {}
+local departmentCache = {}
 local tryGetBadgerRoles
 local missingBadgerRoleExportWarned = false
+local creatorHasJoined = false
+local departmentCacheTtlMs = 5000
 
 local function toLower(value)
     if value == nil then
@@ -164,11 +167,13 @@ local function setPlayerActiveDepartment(playerSrc, rawKey)
 
     if rawKey == nil or rawKey == false or rawKey == "" then
         activeDepartments[playerId] = nil
+        departmentCache[playerId] = nil
         return true
     end
 
     if rawKey == true then
         activeDepartments[playerId] = true
+        departmentCache[playerId] = nil
         return true
     end
 
@@ -177,6 +182,7 @@ local function setPlayerActiveDepartment(playerSrc, rawKey)
         local department = findDepartmentByKey(key)
         if department then
             activeDepartments[playerId] = department
+            departmentCache[playerId] = nil
             return true
         end
     end
@@ -187,6 +193,7 @@ local function setPlayerActiveDepartment(playerSrc, rawKey)
     end
 
     activeDepartments[playerId] = department
+    departmentCache[playerId] = nil
     return true
 end
 
@@ -232,10 +239,11 @@ tryGetBadgerRoles = function(playerSrc)
     end
 
     local declaredExports = getDeclaredServerExports(resourceName)
+    local hasDeclaredExports = next(declaredExports) ~= nil
     local attempted = false
 
     for _, fnName in ipairs(probes) do
-        if declaredExports[fnName] then
+        if declaredExports[fnName] or exportsRef[fnName] ~= nil or not hasDeclaredExports then
             attempted = true
             local ok, value = callExportSafely(exportsRef, fnName, playerSrc)
             if ok and type(value) == "table" then
@@ -421,6 +429,9 @@ RegisterNetEvent("nova_scoreboard:setActiveDepartment", function(rawKey)
             return
         end
         rawKey = requestedDepartment.key
+    elseif requested == true then
+        print(("[Scoreboard] Rejected boolean active department from player %s"):format(tostring(src)))
+        return
     end
 
     local ok = setPlayerActiveDepartment(src, rawKey)
@@ -434,12 +445,36 @@ end)
 local function registerDutyBridgeEvent(eventName, isActive)
     RegisterNetEvent(eventName, function(rawValue)
         local src = source
+        local invokingResource = GetInvokingResource()
+        local badgerResource = Config.BadgerActivityResource or "Badger_PoliceEMSActivity"
+        local trustedInvocation = invokingResource == badgerResource
         if isActive then
-            if not setPlayerActiveDepartment(src, rawValue == nil and true or rawValue) then
+            local dutyValue = rawValue
+            if (dutyValue == nil or dutyValue == true) and not trustedInvocation then
+                print(("[Scoreboard] Rejected untrusted duty bridge payload from '%s' for player %s"):format(eventName, tostring(src)))
+                return
+            end
+
+            local requested = dutyValue
+            if type(requested) == "table" then
+                requested = requested.key or requested.departmentKey or requested.department or requested.name
+            end
+
+            if requested ~= nil and requested ~= false and requested ~= "" and requested ~= true then
+                local requestedDepartment = findDepartmentByKey(requested)
+                if not requestedDepartment or not playerCanUseDepartment(src, requestedDepartment.key) then
+                    print(("[Scoreboard] Rejected unauthorized duty bridge department '%s' from '%s' for player %s"):format(tostring(requested), eventName, tostring(src)))
+                    return
+                end
+                dutyValue = requestedDepartment.key
+            end
+
+            if not setPlayerActiveDepartment(src, dutyValue == nil and true or dutyValue) then
                 print(("[Scoreboard] Could not map duty value from '%s' for player %s"):format(eventName, tostring(src)))
             end
         else
             activeDepartments[src] = nil
+            departmentCache[src] = nil
         end
 
         TriggerClientEvent("nova_scoreboard:refreshNow", -1)
@@ -558,7 +593,36 @@ AddEventHandler("playerDropped", function(_)
     local src = source
     dutySelections[src] = nil
     activeDepartments[src] = nil
+    departmentCache[src] = nil
+    if Config.EnableCreatorMessage then
+        local identifiers = GetPlayerIdentifiers(src)
+        if identifiers then
+            for _, id in ipairs(identifiers) do
+                if id == Config.CreatorIdentifier then
+                    creatorHasJoined = false
+                    break
+                end
+            end
+        end
+    end
 end)
+
+local function getCachedDepartment(playerId, playerName)
+    local now = GetGameTimer()
+    local cached = departmentCache[playerId]
+    if cached and cached.expiresAt and cached.expiresAt > now and cached.playerName == playerName then
+        return cached.department
+    end
+
+    local department = resolveDepartment(playerId, playerName)
+    departmentCache[playerId] = {
+        department = department,
+        expiresAt = now + departmentCacheTtlMs,
+        playerName = playerName
+    }
+
+    return department
+end
 
 local function buildPlayerList()
     local players = {}
@@ -569,7 +633,7 @@ local function buildPlayerList()
         table.insert(players, {
             id = playerId,
             name = playerName,
-            department = resolveDepartment(playerId, playerName)
+            department = getCachedDepartment(playerId, playerName)
         })
     end
 
@@ -613,8 +677,6 @@ RegisterNetEvent("nova_scoreboard:requestScoreboardData", function()
     })
 end)
 
-local creatorHasJoined = false
-
 if Config.EnableCreatorMessage then
     AddEventHandler('playerJoining', function(_)
         local src = source
@@ -639,18 +701,4 @@ if Config.EnableCreatorMessage then
         end)
     end)
     
-    AddEventHandler('playerDropped', function(_)
-        local src = source
-        activeDepartments[src] = nil
-        dutySelections[src] = nil
-        local identifiers = GetPlayerIdentifiers(src)
-        if identifiers then
-            for _, id in ipairs(identifiers) do
-                if id == Config.CreatorIdentifier then
-                    creatorHasJoined = false
-                    break
-                end
-            end
-        end
-    end)
 end
