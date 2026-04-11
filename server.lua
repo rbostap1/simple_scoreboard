@@ -50,6 +50,25 @@ local function getDeclaredServerExports(resourceName)
     return declared
 end
 
+local function callExportSafely(exportsRef, fnName, ...)
+    local fn = exportsRef[fnName]
+    if not fn then
+        return false, nil
+    end
+
+    local ok, value = pcall(fn, exportsRef, ...)
+    if ok then
+        return true, value
+    end
+
+    ok, value = pcall(fn, ...)
+    if ok then
+        return true, value
+    end
+
+    return false, nil
+end
+
 local function buildDefaultDepartment()
     local d = Config.DefaultDepartment or {}
     return {
@@ -203,12 +222,9 @@ tryGetBadgerRoles = function(playerSrc)
     for _, fnName in ipairs(probes) do
         if declaredExports[fnName] then
             attempted = true
-            local fn = exportsRef[fnName]
-            if fn then
-                local ok, value = pcall(fn, playerSrc)
-                if ok and type(value) == "table" then
-                    return value
-                end
+            local ok, value = callExportSafely(exportsRef, fnName, playerSrc)
+            if ok and type(value) == "table" then
+                return value
             end
         end
     end
@@ -271,14 +287,11 @@ local function tryGetBadgerActivityDepartment(playerSrc)
     }
 
     for _, fnName in ipairs(probes) do
-        local fn = exportsRef[fnName]
-        if fn then
-            local ok, value = pcall(fn, playerSrc)
-            if ok then
-                local normalized = normalizeDepartmentValue(value)
-                if normalized ~= nil then
-                    return normalized
-                end
+        local ok, value = callExportSafely(exportsRef, fnName, playerSrc)
+        if ok then
+            local normalized = normalizeDepartmentValue(value)
+            if normalized ~= nil then
+                return normalized
             end
         end
     end
