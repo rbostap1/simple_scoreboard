@@ -1,6 +1,7 @@
 local activeDepartments = {}
 local dutySelections = {}
 local tryGetBadgerRoles
+local missingBadgerRoleExportWarned = false
 
 local function toLower(value)
     if value == nil then
@@ -30,6 +31,23 @@ local function hasRole(roleList, roleId)
     end
 
     return false
+end
+
+local function getDeclaredServerExports(resourceName)
+    local declared = {}
+    local keys = { "server_export", "export" }
+
+    for _, key in ipairs(keys) do
+        local count = GetNumResourceMetadata(resourceName, key) or 0
+        for i = 0, count - 1 do
+            local exportName = GetResourceMetadata(resourceName, key, i)
+            if exportName and exportName ~= "" then
+                declared[exportName] = true
+            end
+        end
+    end
+
+    return declared
 end
 
 local function buildDefaultDepartment()
@@ -153,21 +171,51 @@ tryGetBadgerRoles = function(playerSrc)
         return nil
     end
 
-    local probes = {
+    local configuredExport = tostring(Config.BadgerRoleExport or "")
+    local probes = {}
+    if configuredExport ~= "" then
+        table.insert(probes, configuredExport)
+    end
+
+    local defaults = {
         "GetDiscordRoles",
         "GetDiscordRolesFromSrc",
         "GetRoles",
         "GetDiscordRole"
     }
 
-    for _, fnName in ipairs(probes) do
-        local fn = exportsRef[fnName]
-        if fn then
-            local ok, value = pcall(fn, playerSrc)
-            if ok and type(value) == "table" then
-                return value
+    for _, fnName in ipairs(defaults) do
+        local exists = false
+        for _, probe in ipairs(probes) do
+            if probe == fnName then
+                exists = true
+                break
             end
         end
+        if not exists then
+            table.insert(probes, fnName)
+        end
+    end
+
+    local declaredExports = getDeclaredServerExports(resourceName)
+    local attempted = false
+
+    for _, fnName in ipairs(probes) do
+        if declaredExports[fnName] then
+            attempted = true
+            local fn = exportsRef[fnName]
+            if fn then
+                local ok, value = pcall(fn, playerSrc)
+                if ok and type(value) == "table" then
+                    return value
+                end
+            end
+        end
+    end
+
+    if not attempted and not missingBadgerRoleExportWarned then
+        missingBadgerRoleExportWarned = true
+        print(("[Scoreboard] No compatible role export found on '%s'. Update Config.BadgerRoleExport."):format(resourceName))
     end
 
     return nil

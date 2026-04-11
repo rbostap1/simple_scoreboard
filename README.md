@@ -44,11 +44,12 @@ Config.LogoURL = "https://example.com/yourlogo.png"
 Config.DepartmentMode = "discord_roles" -- or "badger_duty"
 Config.EnableBadgerApi = true
 Config.BadgerResource = "Badger_Discord_API"
+Config.BadgerRoleExport = "GetDiscordRoles" -- set to your Badger export name
 Config.EnableDepartmentFallback = true
 Config.RequireActiveDepartment = true
 Config.BadgerActivityResource = "Badger_PoliceEMSActivity"
 Config.EnableDutyCommand = true
-Config.DutyCommandName = "duty"
+Config.DutyCommandName = "NSduty"
 ```
 
 ### Department Mode
@@ -112,6 +113,7 @@ Config.DefaultDepartment = {
 
 ## Badger Integration Notes
 - This resource attempts common Badger export names automatically.
+- If your Badger build uses a different export name, set `Config.BadgerRoleExport`.
 - If `Badger_Discord_API` is not started, it falls back to keyword matching (if enabled).
 - Role matching is based on the role IDs listed in each department's `roles` array.
 

@@ -33,6 +33,8 @@ Config.DepartmentMode = "discord_roles"
 -- Enable role lookup via Badger_Discord_API.
 Config.EnableBadgerApi = true
 Config.BadgerResource = "Badger_Discord_API"
+-- Set this if your Badger Discord API uses a custom export name for role fetch.
+Config.BadgerRoleExport = "GetDiscordRoles"
 
 -- If true, use fallback keyword matching when Badger data is unavailable.
 Config.EnableDepartmentFallback = true
