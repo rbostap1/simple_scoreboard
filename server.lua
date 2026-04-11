@@ -4,7 +4,9 @@ local departmentCache = {}
 local tryGetBadgerRoles
 local missingBadgerRoleExportWarned = false
 local creatorHasJoined = false
-local departmentCacheTtlMillis = 5000
+local DEPARTMENT_CACHE_TTL_MS = 5000
+local DEFAULT_BADGER_ROLE_RESOURCE = "Badger_Discord_API"
+local DEFAULT_BADGER_ACTIVITY_RESOURCE = "Badger_PoliceEMSActivity"
 
 local function toLower(value)
     if value == nil then
@@ -206,7 +208,7 @@ tryGetBadgerRoles = function(playerSrc)
         return nil
     end
 
-    local resourceName = Config.BadgerResource or "Badger_Discord_API"
+    local resourceName = Config.BadgerResource or DEFAULT_BADGER_ROLE_RESOURCE
     if GetResourceState(resourceName) ~= "started" then
         return nil
     end
@@ -292,7 +294,7 @@ local function normalizeDepartmentValue(value)
 end
 
 local function tryGetBadgerActivityDepartment(playerSrc)
-    local resourceName = Config.BadgerActivityResource or "Badger_PoliceEMSActivity"
+    local resourceName = Config.BadgerActivityResource or DEFAULT_BADGER_ACTIVITY_RESOURCE
     if GetResourceState(resourceName) ~= "started" then
         return nil
     end
@@ -451,7 +453,7 @@ local function registerDutyBridgeEvent(eventName, isActive)
     RegisterNetEvent(eventName, function(rawValue)
         local src = source
         local invokingResource = GetInvokingResource()
-        local badgerResource = Config.BadgerActivityResource or "Badger_PoliceEMSActivity"
+        local badgerResource = Config.BadgerActivityResource or DEFAULT_BADGER_ACTIVITY_RESOURCE
         local trustedInvocation = invokingResource == badgerResource
         if isActive then
             local dutyValue = rawValue
@@ -604,10 +606,14 @@ AddEventHandler("playerDropped", function(_)
     activeDepartments[src] = nil
     departmentCache[src] = nil
     if Config.EnableCreatorMessage then
+        local creatorIdentifier = Config.CreatorIdentifier
+        if not creatorIdentifier or creatorIdentifier == "" then
+            return
+        end
         local identifiers = GetPlayerIdentifiers(src)
         if identifiers then
             for _, id in ipairs(identifiers) do
-                if id == Config.CreatorIdentifier then
+                if id == creatorIdentifier then
                     creatorHasJoined = false
                     break
                 end
@@ -626,7 +632,7 @@ local function getCachedDepartment(playerId, playerName)
     local department = resolveDepartment(playerId, playerName)
     departmentCache[playerId] = {
         department = department,
-        expiresAt = now + departmentCacheTtlMillis,
+        expiresAt = now + DEPARTMENT_CACHE_TTL_MS,
         playerName = playerName
     }
 
@@ -689,13 +695,17 @@ end)
 if Config.EnableCreatorMessage then
     AddEventHandler('playerJoining', function(_)
         local src = source
+        local creatorIdentifier = Config.CreatorIdentifier
+        if not creatorIdentifier or creatorIdentifier == "" then
+            return
+        end
 
         SetTimeout(1000, function()
             local identifiers = GetPlayerIdentifiers(src)
 
             if identifiers then
                 for _, id in ipairs(identifiers) do
-                    if id == Config.CreatorIdentifier then
+                    if id == creatorIdentifier then
                         if not creatorHasJoined then
                             creatorHasJoined = true
 
