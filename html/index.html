@@ -9,46 +9,58 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="playerhud" class="hud hidden">
-        <div class="hud-row">
-            <span id="playerhud-id" class="hud-id"># --</span>
-            <span id="playerhud-department" class="hud-dept" style="--dept-color:#8A8F98;">N/A</span>
-        </div>
-        <div id="playerhud-name" class="hud-name">Unknown Player</div>
-        <div id="playerhud-players" class="hud-count">0 / 32 online</div>
-    </div>
+    <div class="scene-shell">
+        <div class="scene-grid"></div>
+        <div class="scene-orb orb-left"></div>
+        <div class="scene-orb orb-right"></div>
 
-    <div id="scoreboard">
-        <div class="panel-backdrop"></div>
-        <div id="header" class="score-header">
-            <div class="header-main">
-                <div class="logo-capsule">
-                    <img id="logo" src="" alt="Server logo" style="display:none;">
-                    <div id="logoFallback" class="logo-fallback">SB</div>
+        <section id="scoreboard" class="scoreboard-shell">
+            <div class="scoreboard-frame"></div>
+            <div class="scoreboard-noise"></div>
+
+            <div id="header" class="score-header">
+                <div class="header-main">
+                    <div class="logo-capsule">
+                        <img id="logo" src="" alt="Server logo" style="display:none;">
+                        <div id="logoFallback" class="logo-fallback">SB</div>
+                    </div>
+                    <div class="title-wrap">
+                        <div class="eyebrow">Live Roster</div>
+                        <div id="servername" class="server-name">Server Name</div>
+                        <div class="title-subtext">A polished department board for quick scanning and live status checks.</div>
+                    </div>
                 </div>
-                <div class="title-wrap">
-                    <div class="eyebrow">Active Units</div>
-                    <div id="servername" class="server-name">Server Name</div>
+                <div class="header-meta">
+                    <div class="count-chip-wrap">
+                        <div id="playercount" class="count-chip">0 / 32</div>
+                        <div class="count-label">Connected</div>
+                    </div>
                 </div>
             </div>
-            <div class="header-meta">
-                <div id="playercount" class="count-chip">0 / 32</div>
-                <div class="meta-label">Connected</div>
+
+            <div class="status-band">
+                <div class="status-tile">
+                    <span class="status-label">Online</span>
+                    <span id="playercountMirror" class="status-value">0 / 32</span>
+                </div>
+                <div class="status-tile">
+                    <span class="status-label">Departments</span>
+                    <span id="departmentCount" class="status-value">0</span>
+                </div>
             </div>
-        </div>
 
-        <div class="department-strip" id="departmentSummary"></div>
+            <div class="department-strip" id="departmentSummary"></div>
 
-        <div class="players-shell">
-            <div id="playerlist" class="players-grid">
+            <div class="players-shell">
+                <div id="playerlist" class="players-grid"></div>
             </div>
-        </div>
 
-        <div id="pagination" class="pagination-modern">
-            <button id="prevPage" class="page-btn" type="button">Prev</button>
-            <span id="pageIndicator">Page 1 / 1</span>
-            <button id="nextPage" class="page-btn" type="button">Next</button>
-        </div>
+            <div id="pagination" class="pagination-modern">
+                <button id="prevPage" class="page-btn" type="button">Prev</button>
+                <span id="pageIndicator">Page 1 / 1</span>
+                <button id="nextPage" class="page-btn" type="button">Next</button>
+            </div>
+        </section>
     </div>
 
     <script src="script.js"></script>

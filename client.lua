@@ -62,7 +62,13 @@ CreateThread(function()
         highlightColor = Config.HighlightColor or "#6495FF",
         colors = Config.Colors or {},
         departments = Config.Departments or {},
-        defaultDepartment = Config.DefaultDepartment or {}
+        defaultDepartment = Config.DefaultDepartment or {
+            key = "civ",
+            label = "Civilian",
+            shortLabel = "CIV",
+            color = "#B8A168",
+            icon = "user"
+        }
     })
 end)
 

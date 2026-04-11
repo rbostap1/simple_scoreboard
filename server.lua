@@ -40,11 +40,11 @@ end
 local function buildDefaultDepartment()
     local d = Config.DefaultDepartment or {}
     return {
-        key = d.key or "unknown",
-        label = d.label or "Unassigned",
-        shortLabel = d.shortLabel or "N/A",
-        color = d.color or "#8A8F98",
-        icon = d.icon or "dot"
+        key = d.key or "civ",
+        label = d.label or "Civilian",
+        shortLabel = d.shortLabel or "CIV",
+        color = d.color or "#B8A168",
+        icon = d.icon or "user"
     }
 end
 
@@ -79,6 +79,20 @@ local function setPlayerActiveDepartment(playerSrc, rawKey)
     if rawKey == nil or rawKey == false or rawKey == "" then
         activeDepartments[playerId] = nil
         return true
+    end
+
+    if rawKey == true then
+        activeDepartments[playerId] = true
+        return true
+    end
+
+    if type(rawKey) == "table" then
+        local key = rawKey.key or rawKey.departmentKey or rawKey.department or rawKey.name
+        local department = findDepartmentByKey(key)
+        if department then
+            activeDepartments[playerId] = department
+            return true
+        end
     end
 
     local department = findDepartmentByKey(rawKey)
@@ -126,19 +140,74 @@ local function tryGetBadgerRoles(playerSrc)
     return nil
 end
 
-local function resolveDepartment(playerSrc, playerName)
+local function normalizeDepartmentValue(value)
+    if value == nil then
+        return nil
+    end
+
+    if type(value) == "table" then
+        local key = value.key or value.departmentKey or value.department or value.name or value.label
+        local department = findDepartmentByKey(key)
+        if department then
+            return department
+        end
+
+        return value.active == true or value.onDuty == true or value.duty == true
+    end
+
+    if type(value) == "string" then
+        return findDepartmentByKey(value)
+    end
+
+    if type(value) == "boolean" then
+        return value
+    end
+
+    return nil
+end
+
+local function tryGetBadgerActivityDepartment(playerSrc)
+    local resourceName = Config.BadgerActivityResource or "Badger_PoliceEMSActivity"
+    if GetResourceState(resourceName) ~= "started" then
+        return nil
+    end
+
+    local exportsRef = exports[resourceName]
+    if not exportsRef then
+        return nil
+    end
+
+    local probes = {
+        "GetActiveDepartment",
+        "GetCurrentDepartment",
+        "GetPlayerActiveDepartment",
+        "GetPlayerDepartment",
+        "GetDepartment",
+        "GetDutyDepartment",
+        "IsOnDuty",
+        "GetOnDuty",
+        "GetDuty"
+    }
+
+    for _, fnName in ipairs(probes) do
+        local fn = exportsRef[fnName]
+        if fn then
+            local ok, value = pcall(fn, playerSrc)
+            if ok then
+                local normalized = normalizeDepartmentValue(value)
+                if normalized ~= nil then
+                    return normalized
+                end
+            end
+        end
+    end
+
+    return nil
+end
+
+local function resolveDepartmentFromRoles(playerSrc, playerName)
     local defaultDept = buildDefaultDepartment()
-
-    -- Active-only mode: show a department blip only if explicitly set by a duty script.
-    if Config.RequireActiveDepartment ~= false then
-        return activeDepartments[playerSrc] or defaultDept
-    end
-
     local departments = Config.Departments or {}
-
-    if type(departments) ~= "table" or #departments == 0 then
-        return defaultDept
-    end
 
     local roles = tryGetBadgerRoles(playerSrc)
     if roles then
@@ -191,6 +260,52 @@ local function resolveDepartment(playerSrc, playerName)
     return defaultDept
 end
 
+local function resolveDepartment(playerSrc, playerName)
+    local defaultDept = buildDefaultDepartment()
+
+    local activeDepartment = activeDepartments[playerSrc]
+    if Config.RequireActiveDepartment ~= false then
+        if type(activeDepartment) == "table" then
+            return activeDepartment
+        end
+
+        if activeDepartment == true then
+            local activityDepartment = tryGetBadgerActivityDepartment(playerSrc)
+            if type(activityDepartment) == "table" then
+                return activityDepartment
+            end
+
+            if activityDepartment == true then
+                return resolveDepartmentFromRoles(playerSrc, playerName)
+            end
+
+            return resolveDepartmentFromRoles(playerSrc, playerName)
+        end
+
+        local activityDepartment = tryGetBadgerActivityDepartment(playerSrc)
+        if type(activityDepartment) == "table" then
+            return activityDepartment
+        end
+
+        if activityDepartment == true then
+            return resolveDepartmentFromRoles(playerSrc, playerName)
+        end
+
+        return defaultDept
+    end
+
+    local activityDepartment = tryGetBadgerActivityDepartment(playerSrc)
+    if type(activityDepartment) == "table" then
+        return activityDepartment
+    end
+
+    if activityDepartment == true then
+        return resolveDepartmentFromRoles(playerSrc, playerName)
+    end
+
+    return resolveDepartmentFromRoles(playerSrc, playerName)
+end
+
 RegisterNetEvent("simple_scoreboard:setActiveDepartment", function(rawKey)
     local src = source
     local ok = setPlayerActiveDepartment(src, rawKey)
@@ -201,6 +316,46 @@ RegisterNetEvent("simple_scoreboard:setActiveDepartment", function(rawKey)
     -- Prompt clients to request a fresh player list so HUD/scoreboard updates quickly.
     TriggerClientEvent("simple_scoreboard:refreshNow", -1)
 end)
+
+local function registerDutyBridgeEvent(eventName, isActive)
+    RegisterNetEvent(eventName, function(rawValue)
+        local src = source
+        if isActive then
+            if not setPlayerActiveDepartment(src, rawValue == nil and true or rawValue) then
+                print(("[Scoreboard] Could not map duty value from '%s' for player %s"):format(eventName, tostring(src)))
+            end
+        else
+            activeDepartments[src] = nil
+        end
+
+        TriggerClientEvent("simple_scoreboard:refreshNow", -1)
+    end)
+end
+
+local dutyBridgeEvents = {
+    on = {
+        "Badger_PoliceEMSActivity:OnDuty",
+        "Badger_PoliceEMSActivity:Client:OnDuty",
+        "Badger_PoliceEMSActivity:ToggleDutyOn",
+        "Badger_PoliceEMSActivity:SetOnDuty",
+        "Badger_PoliceEMSActivity:SetDuty"
+    },
+    off = {
+        "Badger_PoliceEMSActivity:OffDuty",
+        "Badger_PoliceEMSActivity:Client:OffDuty",
+        "Badger_PoliceEMSActivity:ToggleDutyOff",
+        "Badger_PoliceEMSActivity:SetOffDuty",
+        "Badger_PoliceEMSActivity:ClearDuty"
+    }
+}
+
+for _, eventName in ipairs(dutyBridgeEvents.on) do
+    registerDutyBridgeEvent(eventName, true)
+end
+
+for _, eventName in ipairs(dutyBridgeEvents.off) do
+    registerDutyBridgeEvent(eventName, false)
+end
 
 exports("SetPlayerActiveDepartment", function(playerSrc, departmentKey)
     local ok = setPlayerActiveDepartment(playerSrc, departmentKey)

@@ -11,8 +11,7 @@ files {
 
 client_scripts {
     'config.lua',
-    'client.lua',
-    'hud.lua'
+    'client.lua'
 }
 server_scripts {
     'config.lua',

@@ -1,12 +1,17 @@
 # Simple Scoreboard
 
-A lightweight FiveM scoreboard with a redesigned UI, optional Badger API integration, and department blips for each player.
+A lightweight FiveM scoreboard with a full visual redesign, optional Badger API integration, and department blips for each player.
+
+## Recent Updates
+- Complete scoreboard redesign with a glass-style layout, stronger typography, and modern player cards.
+- Player HUD removed from the resource.
+- Civilian is now the default fallback department.
+- Badger Police/EMS Activity support added for duty-state lookups.
 
 ## Features
 - New scoreboard visual design with a wider panel, modern cards, and responsive layout.
 - Department blips on every player card.
 - Department summary strip showing online counts by department.
-- HUD now includes your department blip with color coding.
 - Optional Badger API support for role-to-department mapping.
 - Safe fallback department matching if Badger is unavailable.
 - Server-side player list synchronization.
@@ -40,6 +45,7 @@ Config.EnableBadgerApi = true
 Config.BadgerResource = "Badger_Discord_API"
 Config.EnableDepartmentFallback = true
 Config.RequireActiveDepartment = true
+Config.BadgerActivityResource = "Badger_PoliceEMSActivity"
 ```
 
 ### Departments
@@ -68,11 +74,11 @@ Config.Departments = {
 }
 
 Config.DefaultDepartment = {
-    key = "unknown",
-    label = "Unassigned",
-    shortLabel = "N/A",
-    color = "#8A8F98",
-    icon = "dot"
+    key = "civ",
+    label = "Civilian",
+    shortLabel = "CIV",
+    color = "#B8A168",
+    icon = "user"
 }
 ```
 
@@ -84,7 +90,9 @@ Config.DefaultDepartment = {
 ## Active Department Mode
 When `Config.RequireActiveDepartment = true`, department blips are shown only for players actively set to a department.
 
-If a player is not marked active, they show as your `Config.DefaultDepartment` (for example `N/A`).
+If a player is not marked active, they show as your `Config.DefaultDepartment` (by default `Civilian`).
+
+The server also checks `Config.BadgerActivityResource` for duty-state exports before falling back to Badger role mapping.
 
 Use one of these server-side integrations from your duty script:
 
@@ -113,11 +121,10 @@ Department data is attached to each player object from the server:
 The NUI uses this to render:
 - Card blips in the scoreboard list.
 - Department total pills in the header strip.
-- Local department pill in the HUD.
 
 ## Troubleshooting
 - No departments showing: verify Badger resource name and role IDs in `Config.Departments`.
-- Everyone shows `N/A`: Badger did not return roles and no fallback keyword matched.
+- Everyone shows `Civilian`: the player is not marked on duty or Badger did not return a matching role.
 - No players visible: ensure `server.lua` is included in `fxmanifest.lua`.
 
 ## Credits

@@ -5,16 +5,9 @@ let currentPlayerId = null;
 let highlightEnabled = true;
 let highlightColor = "#E56B1F";
 let logoEnabled = true;
-let hudEnabled = false;
 let colors = {};
 
 const playersPerPage = 12;
-
-const hudEl = document.getElementById("playerhud");
-const hudIdEl = document.getElementById("playerhud-id");
-const hudNameEl = document.getElementById("playerhud-name");
-const hudPlayersEl = document.getElementById("playerhud-players");
-const hudDepartmentEl = document.getElementById("playerhud-department");
 
 function hexToRgb(hex) {
     const normalized = `${hex || ""}`.trim();
@@ -27,13 +20,19 @@ function hexToRgb(hex) {
     };
 }
 
+function rgbaFromHex(hex, alpha) {
+    const rgb = hexToRgb(hex);
+    if (!rgb) return null;
+    return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+}
+
 function safeDepartment(dept) {
     const fallback = {
-        key: "unknown",
-        label: "Unassigned",
-        shortLabel: "N/A",
-        color: "#8A8F98",
-        icon: "dot"
+        key: "civ",
+        label: "Civilian",
+        shortLabel: "CIV",
+        color: "#B8A168",
+        icon: "user"
     };
 
     if (!dept || typeof dept !== "object") {
@@ -74,22 +73,48 @@ function applyColorVariables(configColors) {
         }
     };
 
-    setColor("primary", colors.primary, "#E56B1F");
-    setColor("primary-dark", colors.primaryDark, "#A64619");
-    setColor("text-white", colors.textWhite, "#FAF6E9");
-    setColor("text-accent", colors.textAccent, "#FFC88E");
-    setColor("text-secondary", colors.textSecondary, "#C3B9A8");
+    setColor("accent", colors.primary, "#E56B1F");
+    setColor("accent-2", colors.secondary, "#3A86FF");
+    setColor("text-main", colors.textWhite, "#FAF6E9");
+    setColor("text-muted", colors.textSecondary, "#C3B9A8");
 
-    document.documentElement.style.setProperty("--background", colors.background || "rgba(9, 13, 20, 0.94)");
-    document.documentElement.style.setProperty("--background-dark", colors.backgroundDark || "rgba(5, 8, 13, 0.98)");
-    document.documentElement.style.setProperty("--card-bg", colors.cardBg || "rgba(18, 24, 35, 0.82)");
+    root.style.setProperty("--panel", colors.cardBg || "rgba(11, 16, 26, 0.78)");
+    root.style.setProperty("--panel-strong", colors.backgroundDark || "rgba(16, 22, 36, 0.92)");
+    root.style.setProperty("--bg-0", colors.background || "#070B12");
+    root.style.setProperty("--bg-1", colors.backgroundDark || "#0D1320");
+    root.style.setProperty("--bg-2", colors.cardBg || "#111A2B");
+
+    const accent = colors.primary || "#E56B1F";
+    const accentDark = colors.primaryDark || "#A64619";
+    const accent2 = colors.secondary || "#3A86FF";
+
+    root.style.setProperty("--glow", rgbaFromHex(accent, 0.24) || "rgba(229, 107, 31, 0.24)");
+    root.style.setProperty("--glow-2", rgbaFromHex(accent2, 0.18) || "rgba(58, 134, 255, 0.18)");
+    root.style.setProperty("--shadow", colors.shadowColor || "rgba(0, 0, 0, 0.56)");
+    root.style.setProperty("--shadow-strong", colors.shadowStrong || "rgba(0, 0, 0, 0.72)");
+
+    root.style.setProperty("--primary", accent);
+    root.style.setProperty("--primary-rgb", hexToRgb(accent) ? `${hexToRgb(accent).r} ${hexToRgb(accent).g} ${hexToRgb(accent).b}` : "229 107 31");
+    root.style.setProperty("--primary-dark", accentDark);
+    root.style.setProperty("--primary-dark-rgb", hexToRgb(accentDark) ? `${hexToRgb(accentDark).r} ${hexToRgb(accentDark).g} ${hexToRgb(accentDark).b}` : "166 70 25");
+    root.style.setProperty("--secondary", accent2);
+    root.style.setProperty("--text-white", colors.textWhite || "#FAF6E9");
+    root.style.setProperty("--text-accent", colors.textAccent || "#FFC88E");
+    root.style.setProperty("--text-secondary", colors.textSecondary || "#C3B9A8");
+    root.style.setProperty("--background", colors.background || "rgba(9, 13, 20, 0.94)");
+    root.style.setProperty("--background-dark", colors.backgroundDark || "rgba(5, 8, 13, 0.98)");
+    root.style.setProperty("--card-bg", colors.cardBg || "rgba(18, 24, 35, 0.82)");
 }
 
 function renderDepartmentSummary() {
     const summaryEl = document.getElementById("departmentSummary");
+    const departmentCountEl = document.getElementById("departmentCount");
     summaryEl.innerHTML = "";
 
     if (!Array.isArray(allPlayers) || allPlayers.length === 0) {
+        if (departmentCountEl) {
+            departmentCountEl.textContent = "0";
+        }
         return;
     }
 
@@ -106,16 +131,20 @@ function renderDepartmentSummary() {
         totals[key].count += 1;
     });
 
-    Object.values(totals)
-        .sort((a, b) => b.count - a.count)
-        .forEach((entry) => {
-            const rgb = hexToRgb(entry.dept.color) || { r: 138, g: 143, b: 152 };
-            const pill = document.createElement("div");
-            pill.className = "dept-pill";
-            pill.style.setProperty("--dept-rgb", `${rgb.r} ${rgb.g} ${rgb.b}`);
-            pill.textContent = `${entry.dept.shortLabel}: ${entry.count}`;
-            summaryEl.appendChild(pill);
-        });
+    const entries = Object.values(totals).sort((a, b) => b.count - a.count);
+
+    entries.forEach((entry) => {
+        const rgb = hexToRgb(entry.dept.color) || { r: 138, g: 143, b: 152 };
+        const pill = document.createElement("div");
+        pill.className = "dept-pill";
+        pill.style.setProperty("--dept-rgb", `${rgb.r} ${rgb.g} ${rgb.b}`);
+        pill.textContent = `${entry.dept.shortLabel}: ${entry.count}`;
+        summaryEl.appendChild(pill);
+    });
+
+    if (departmentCountEl) {
+        departmentCountEl.textContent = `${entries.length}`;
+    }
 }
 
 function renderPlayerPage() {
@@ -135,6 +164,7 @@ function renderPlayerPage() {
     pagePlayers.forEach((player, index) => {
         const card = document.createElement("div");
         card.className = "player-card";
+        card.style.setProperty("--card-delay", `${index * 35}ms`);
 
         if (highlightEnabled && player && player.id === currentPlayerId) {
             card.classList.add("current-player");
@@ -235,54 +265,6 @@ window.addEventListener("message", (event) => {
         }
     }
 
-    if (data.action === "hudConfig" && data.hud) {
-        hudEnabled = !!data.hud.enabled;
-
-        if (data.hud.backgroundColor) {
-            document.documentElement.style.setProperty("--hud-bg", data.hud.backgroundColor);
-        }
-        if (data.hud.borderColor) {
-            document.documentElement.style.setProperty("--hud-border", data.hud.borderColor);
-        }
-        if (data.hud.textColor) {
-            document.documentElement.style.setProperty("--hud-text", data.hud.textColor);
-        }
-
-        hudEl.style.display = hudEnabled ? "flex" : "none";
-    }
-
-    if (data.action === "hudToggle") {
-        hudEnabled = !!data.enabled;
-        hudEl.style.display = hudEnabled ? "flex" : "none";
-    }
-
-    if (data.action === "hudUpdate") {
-        if (data.playerId !== undefined && hudIdEl) {
-            hudIdEl.textContent = `# ${data.playerId}`;
-        }
-
-        if (data.playerName && hudNameEl) {
-            hudNameEl.textContent = data.playerName;
-        }
-
-        if (data.playerCount !== undefined && data.maxPlayers !== undefined && hudPlayersEl) {
-            hudPlayersEl.textContent = `${data.playerCount} / ${data.maxPlayers} online`;
-        }
-
-        if (hudDepartmentEl) {
-            const dept = safeDepartment(data.department);
-            const rgb = hexToRgb(dept.color) || { r: 138, g: 143, b: 152 };
-            hudDepartmentEl.textContent = dept.shortLabel;
-            hudDepartmentEl.style.setProperty("--dept-color", dept.color);
-            hudDepartmentEl.style.backgroundColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`;
-            hudDepartmentEl.style.borderColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.55)`;
-        }
-
-        if (hudEnabled) {
-            hudEl.style.display = "flex";
-        }
-    }
-
     if (data.action === "update") {
         if (!Array.isArray(data.players)) {
             return;
@@ -299,6 +281,11 @@ window.addEventListener("message", (event) => {
         renderPlayerPage();
 
         const playerCount = document.getElementById("playercount");
-        playerCount.textContent = `${allPlayers.length} / ${maxPlayers}`;
+        const playerCountMirror = document.getElementById("playercountMirror");
+        const playerCountText = `${allPlayers.length} / ${maxPlayers}`;
+        playerCount.textContent = playerCountText;
+        if (playerCountMirror) {
+            playerCountMirror.textContent = playerCountText;
+        }
     }
 });

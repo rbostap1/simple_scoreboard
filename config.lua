@@ -27,16 +27,6 @@ Config.HighlightCurrentPlayer = true
 -- Color for current player highlight (use hex color code)
 Config.HighlightColor = "#E56B1F"
 
--- Player HUD toggle (bottom-right) to show local player summary
-Config.EnablePlayerHud = true
-
--- HUD colors
-Config.HudColors = {
-    text = "#FAF6E9",                     -- Main HUD text
-    background = "rgba(10, 14, 22, 0.88)", -- HUD card background
-    border = "#E56B1F"                    -- Accent color for badges and outlines
-}
-
 -- Optional creator join message
 Config.EnableCreatorMessage = true
 Config.CreatorIdentifier = "license:YOUR_LICENSE_HERE"
@@ -60,6 +50,10 @@ Config.EnableDepartmentFallback = true
 -- If true, department blips are only shown when a duty script marks the player active.
 -- Use server event `simple_scoreboard:setActiveDepartment` or exports to set/clear duty.
 Config.RequireActiveDepartment = true
+
+-- Optional Badger Police/EMS Activity resource name used for duty-state lookups.
+-- The script can expose duty state via exports or call the simple_scoreboard duty bridge events.
+Config.BadgerActivityResource = "Badger_PoliceEMSActivity"
 
 -- Department definitions used for scoreboard and HUD "blips".
 -- Put Discord role IDs in roles for each department.
@@ -104,11 +98,11 @@ Config.Departments = {
 
 -- Default department when no match is found.
 Config.DefaultDepartment = {
-    key = "unknown",
-    label = "Unassigned",
-    shortLabel = "N/A",
-    color = "#8A8F98",
-    icon = "dot"
+    key = "civ",
+    label = "Civilian",
+    shortLabel = "CIV",
+    color = "#B8A168",
+    icon = "user"
 }
 
 -----------------------------------
