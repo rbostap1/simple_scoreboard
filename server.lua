@@ -159,6 +159,10 @@ local function findDepartmentByKey(rawKey)
     return nil
 end
 
+local function hasDepartmentSelectionValue(value)
+    return value ~= nil and value ~= false and value ~= ""
+end
+
 local function setPlayerActiveDepartment(playerSrc, rawKey)
     local playerId = tonumber(playerSrc)
     if not playerId then
@@ -243,7 +247,7 @@ tryGetBadgerRoles = function(playerSrc)
     local attempted = false
 
     for _, fnName in ipairs(probes) do
-        if declaredExports[fnName] or exportsRef[fnName] ~= nil or not hasDeclaredExports then
+        if declaredExports[fnName] or not hasDeclaredExports then
             attempted = true
             local ok, value = callExportSafely(exportsRef, fnName, playerSrc)
             if ok and type(value) == "table" then
@@ -422,7 +426,7 @@ RegisterNetEvent("nova_scoreboard:setActiveDepartment", function(rawKey)
         requested = rawKey.key or rawKey.departmentKey or rawKey.department or rawKey.name
     end
 
-    if requested ~= nil and requested ~= false and requested ~= "" and requested ~= true then
+    if hasDepartmentSelectionValue(requested) and requested ~= true then
         local requestedDepartment = findDepartmentByKey(requested)
         if not requestedDepartment or not playerCanUseDepartment(src, requestedDepartment.key) then
             print(("[Scoreboard] Unauthorized active department '%s' from player %s"):format(tostring(requested), tostring(src)))
@@ -460,7 +464,7 @@ local function registerDutyBridgeEvent(eventName, isActive)
                 requested = requested.key or requested.departmentKey or requested.department or requested.name
             end
 
-            if requested ~= nil and requested ~= false and requested ~= "" and requested ~= true then
+            if hasDepartmentSelectionValue(requested) and requested ~= true then
                 local requestedDepartment = findDepartmentByKey(requested)
                 if not requestedDepartment or not playerCanUseDepartment(src, requestedDepartment.key) then
                     print(("[Scoreboard] Rejected unauthorized duty bridge department '%s' from '%s' for player %s"):format(tostring(requested), eventName, tostring(src)))
@@ -469,7 +473,11 @@ local function registerDutyBridgeEvent(eventName, isActive)
                 dutyValue = requestedDepartment.key
             end
 
-            if not setPlayerActiveDepartment(src, dutyValue == nil and true or dutyValue) then
+            if dutyValue == nil and trustedInvocation then
+                dutyValue = true
+            end
+
+            if not setPlayerActiveDepartment(src, dutyValue) then
                 print(("[Scoreboard] Could not map duty value from '%s' for player %s"):format(eventName, tostring(src)))
             end
         else
