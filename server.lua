@@ -1,4 +1,6 @@
 local activeDepartments = {}
+local dutySelections = {}
+local tryGetBadgerRoles
 
 local function toLower(value)
     if value == nil then
@@ -39,6 +41,45 @@ local function buildDefaultDepartment()
         color = d.color or "#B8A168",
         icon = d.icon or "user"
     }
+end
+
+local function getDepartmentMode()
+    local mode = toLower(Config.DepartmentMode)
+    if mode == "badger_duty" then
+        return "badger_duty"
+    end
+    return "discord_roles"
+end
+
+local function sendPlayerMessage(playerSrc, message)
+    TriggerClientEvent("chat:addMessage", playerSrc, {
+        args = { "^5Nova Scoreboard^0", message }
+    })
+end
+
+local function getRoleBasedDepartmentChoices(playerSrc)
+    local choices = {}
+    local roles = tryGetBadgerRoles(playerSrc)
+    if type(roles) ~= "table" then
+        return choices
+    end
+
+    for _, dept in ipairs(Config.Departments or {}) do
+        if type(dept.roles) == "table" then
+            for _, roleId in ipairs(dept.roles) do
+                if hasRole(roles, roleId) then
+                    table.insert(choices, {
+                        key = dept.key,
+                        label = dept.label or dept.key,
+                        shortLabel = dept.shortLabel or dept.label or dept.key
+                    })
+                    break
+                end
+            end
+        end
+    end
+
+    return choices
 end
 
 local function findDepartmentByKey(rawKey)
@@ -97,7 +138,7 @@ local function setPlayerActiveDepartment(playerSrc, rawKey)
     return true
 end
 
-local function tryGetBadgerRoles(playerSrc)
+tryGetBadgerRoles = function(playerSrc)
     if Config.EnableBadgerApi == false then
         return nil
     end
@@ -254,36 +295,19 @@ end
 
 local function resolveDepartment(playerSrc, playerName)
     local defaultDept = buildDefaultDepartment()
+    local mode = getDepartmentMode()
 
-    local activeDepartment = activeDepartments[playerSrc]
-    if Config.RequireActiveDepartment ~= false then
-        if type(activeDepartment) == "table" then
-            return activeDepartment
-        end
-
-        if activeDepartment == true then
-            local activityDepartment = tryGetBadgerActivityDepartment(playerSrc)
-            if type(activityDepartment) == "table" then
-                return activityDepartment
+    if mode == "discord_roles" then
+        if Config.RequireActiveDepartment ~= false then
+            local activeDepartment = activeDepartments[playerSrc]
+            if type(activeDepartment) == "table" then
+                return activeDepartment
             end
-
-            if activityDepartment == true then
-                return resolveDepartmentFromRoles(playerSrc, playerName)
+            if activeDepartment ~= true then
+                return defaultDept
             end
-
-            return resolveDepartmentFromRoles(playerSrc, playerName)
         end
-
-        local activityDepartment = tryGetBadgerActivityDepartment(playerSrc)
-        if type(activityDepartment) == "table" then
-            return activityDepartment
-        end
-
-        if activityDepartment == true then
-            return resolveDepartmentFromRoles(playerSrc, playerName)
-        end
-
-        return defaultDept
+        return resolveDepartmentFromRoles(playerSrc, playerName)
     end
 
     local activityDepartment = tryGetBadgerActivityDepartment(playerSrc)
@@ -293,6 +317,10 @@ local function resolveDepartment(playerSrc, playerName)
 
     if activityDepartment == true then
         return resolveDepartmentFromRoles(playerSrc, playerName)
+    end
+
+    if Config.RequireActiveDepartment ~= false then
+        return defaultDept
     end
 
     return resolveDepartmentFromRoles(playerSrc, playerName)
@@ -362,6 +390,78 @@ exports("ClearPlayerActiveDepartment", function(playerSrc)
         TriggerClientEvent("nova_scoreboard:refreshNow", -1)
     end
     return ok
+end)
+
+RegisterCommand(Config.DutyCommandName or "duty", function(src, args)
+    if src == 0 then
+        print("[Scoreboard] Duty command can only be used by players.")
+        return
+    end
+
+    if Config.EnableDutyCommand == false then
+        sendPlayerMessage(src, "^1Duty command is disabled in config.^0")
+        return
+    end
+
+    if getDepartmentMode() ~= "discord_roles" then
+        sendPlayerMessage(src, "^1Duty command is only available when Config.DepartmentMode is set to 'discord_roles'.^0")
+        return
+    end
+
+    local rawChoice = args and args[1]
+    if rawChoice and (toLower(rawChoice) == "off" or toLower(rawChoice) == "clear") then
+        setPlayerActiveDepartment(src, nil)
+        dutySelections[src] = nil
+        TriggerClientEvent("nova_scoreboard:refreshNow", -1)
+        sendPlayerMessage(src, "^3You are now off duty.^0")
+        return
+    end
+
+    local choices = dutySelections[src]
+    if type(choices) ~= "table" or #choices == 0 then
+        choices = getRoleBasedDepartmentChoices(src)
+        dutySelections[src] = choices
+    end
+
+    if #choices == 0 then
+        sendPlayerMessage(src, "^1No eligible departments found for your Discord roles.^0")
+        return
+    end
+
+    if not rawChoice or rawChoice == "" then
+        sendPlayerMessage(src, "^2Select a department with /" .. (Config.DutyCommandName or "duty") .. " <number>^0")
+        for index, dept in ipairs(choices) do
+            sendPlayerMessage(src, ("^3[%d]^0 %s (%s)"):format(index, tostring(dept.label), tostring(dept.shortLabel)))
+        end
+        sendPlayerMessage(src, "^3Type /" .. (Config.DutyCommandName or "duty") .. " off to clear duty.^0")
+        return
+    end
+
+    local choiceIndex = tonumber(rawChoice)
+    if not choiceIndex then
+        sendPlayerMessage(src, "^1Invalid option. Use /" .. (Config.DutyCommandName or "duty") .. " to see the numbered list.^0")
+        return
+    end
+
+    local selected = choices[choiceIndex]
+    if not selected then
+        sendPlayerMessage(src, "^1That number is not in your department list. Run /" .. (Config.DutyCommandName or "duty") .. " again.^0")
+        return
+    end
+
+    if not setPlayerActiveDepartment(src, selected.key) then
+        sendPlayerMessage(src, "^1Could not set your duty department. Check department keys in config.^0")
+        return
+    end
+
+    dutySelections[src] = nil
+    TriggerClientEvent("nova_scoreboard:refreshNow", -1)
+    sendPlayerMessage(src, ("^2Duty set to %s.^0"):format(tostring(selected.label)))
+end, false)
+
+AddEventHandler("playerDropped", function(_)
+    local src = source
+    dutySelections[src] = nil
 end)
 
 local function buildPlayerList()
@@ -446,6 +546,7 @@ if Config.EnableCreatorMessage then
     AddEventHandler('playerDropped', function(_)
         local src = source
         activeDepartments[src] = nil
+        dutySelections[src] = nil
         local identifiers = GetPlayerIdentifiers(src)
         if identifiers then
             for _, id in ipairs(identifiers) do

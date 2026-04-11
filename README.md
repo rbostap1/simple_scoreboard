@@ -41,12 +41,40 @@ Config.LogoURL = "https://example.com/yourlogo.png"
 
 ### Badger API
 ```lua
+Config.DepartmentMode = "discord_roles" -- or "badger_duty"
 Config.EnableBadgerApi = true
 Config.BadgerResource = "Badger_Discord_API"
 Config.EnableDepartmentFallback = true
 Config.RequireActiveDepartment = true
 Config.BadgerActivityResource = "Badger_PoliceEMSActivity"
+Config.EnableDutyCommand = true
+Config.DutyCommandName = "duty"
 ```
+
+### Department Mode
+- `discord_roles`: Departments are resolved from Discord role IDs in `Config.Departments.roles`.
+- `badger_duty`: Departments are resolved from `Config.BadgerActivityResource` duty exports.
+
+When using `badger_duty`:
+- If the duty export returns a department key/table, that is used directly.
+- If the duty export only returns `true/false`, the scoreboard falls back to role mapping for department identity while still using duty state for active/inactive.
+
+## Duty Chat Command (Discord Roles Mode)
+When `Config.DepartmentMode = "discord_roles"`, players can use a chat command to select their active department from eligible Discord roles.
+
+Usage:
+- `/<command>` lists available departments with numbers.
+- `/<command> <number>` sets active department.
+- `/<command> off` clears active duty.
+
+Example with default command name:
+- `/duty`
+- `/duty 2`
+- `/duty off`
+
+Notes:
+- Only departments matching the player's Discord roles are shown.
+- This command is disabled automatically when `Config.DepartmentMode` is `badger_duty`.
 
 ### Departments
 Map your Discord role IDs into each department.
@@ -92,7 +120,7 @@ When `Config.RequireActiveDepartment = true`, department blips are shown only fo
 
 If a player is not marked active, they show as your `Config.DefaultDepartment` (by default `Civilian`).
 
-The server also checks `Config.BadgerActivityResource` for duty-state exports before falling back to Badger role mapping.
+In `badger_duty` mode, the server checks `Config.BadgerActivityResource` for duty-state/department exports.
 
 Use one of these server-side integrations from your duty script:
 

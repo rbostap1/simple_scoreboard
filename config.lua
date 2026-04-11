@@ -25,6 +25,11 @@ Config.CreatorMessage = "^3The script creator/editor ^2NAME HERE ^3has joined th
 
 -- Department integration settings
 
+-- Choose how department is resolved:
+-- "discord_roles" = map via Config.Departments.roles
+-- "badger_duty"   = map via Config.BadgerActivityResource duty exports
+Config.DepartmentMode = "discord_roles"
+
 -- Enable role lookup via Badger_Discord_API.
 Config.EnableBadgerApi = true
 Config.BadgerResource = "Badger_Discord_API"
@@ -40,6 +45,10 @@ Config.RequireActiveDepartment = true
 
 -- Optional duty-state resource used for automatic active department checks.
 Config.BadgerActivityResource = "Badger_PoliceEMSActivity"
+
+-- Chat duty command (Discord role mode only)
+Config.EnableDutyCommand = true
+Config.DutyCommandName = "duty"
 
 -- Department definitions
 -- Replace ROLE_ID_* values with your real Discord role IDs.
