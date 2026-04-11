@@ -26,6 +26,15 @@ function rgbaFromHex(hex, alpha) {
     return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
 }
 
+function escapeHtml(value) {
+    return `${value ?? ""}`
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+}
+
 function safeDepartment(dept) {
     const fallback = {
         key: "civ",
@@ -178,12 +187,12 @@ function renderPlayerPage() {
         card.innerHTML = `
             <div class="player-top">
                 <div class="player-index">#${startIdx + index + 1}</div>
-                <div class="player-id">ID ${playerId}</div>
+                <div class="player-id">ID ${escapeHtml(playerId)}</div>
             </div>
-            <div class="player-name">${playerName}</div>
+            <div class="player-name">${escapeHtml(playerName)}</div>
             <div class="dept-badge" style="--dept-rgb:${rgb.r} ${rgb.g} ${rgb.b}">
                 <span class="dept-dot"></span>
-                <span>${iconForDepartment(dept.icon)} ${dept.shortLabel}</span>
+                <span>${iconForDepartment(dept.icon)} ${escapeHtml(dept.shortLabel)}</span>
             </div>
         `;
 

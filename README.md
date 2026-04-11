@@ -156,8 +156,8 @@ Config.DefaultDepartment = {
 Use from another server resource:
 
 ```lua
-exports["simple_scoreboard"]:SetPlayerActiveDepartment(source, "police")
-exports["simple_scoreboard"]:ClearPlayerActiveDepartment(source)
+exports["Nova_Scoreboard"]:SetPlayerActiveDepartment(source, "police")
+exports["Nova_Scoreboard"]:ClearPlayerActiveDepartment(source)
 ```
 
 ### Net Event Bridge

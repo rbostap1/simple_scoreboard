@@ -84,3 +84,14 @@ RegisterNetEvent("nova_scoreboard:refreshNow", function()
         updateScoreboard()
     end
 end)
+
+CreateThread(function()
+    while true do
+        if scoreboardOpen then
+            updateScoreboard()
+            Wait(5000)
+        else
+            Wait(500)
+        end
+    end
+end)

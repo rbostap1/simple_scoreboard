@@ -119,6 +119,21 @@ local function getRoleBasedDepartmentChoices(playerSrc)
     return choices
 end
 
+local function playerCanUseDepartment(playerSrc, departmentKey)
+    if not departmentKey or departmentKey == "" then
+        return false
+    end
+
+    local target = toLower(departmentKey)
+    for _, choice in ipairs(getRoleBasedDepartmentChoices(playerSrc)) do
+        if toLower(choice.key) == target then
+            return true
+        end
+    end
+
+    return false
+end
+
 local function findDepartmentByKey(rawKey)
     if rawKey == nil then
         return nil
@@ -362,7 +377,11 @@ local function resolveDepartment(playerSrc, playerName)
         if Config.RequireActiveDepartment ~= false then
             local activeDepartment = activeDepartments[playerSrc]
             if type(activeDepartment) == "table" then
-                return activeDepartment
+                if playerCanUseDepartment(playerSrc, activeDepartment.key) then
+                    return activeDepartment
+                end
+                activeDepartments[playerSrc] = nil
+                return defaultDept
             end
             if activeDepartment ~= true then
                 return defaultDept
@@ -389,6 +408,21 @@ end
 
 RegisterNetEvent("nova_scoreboard:setActiveDepartment", function(rawKey)
     local src = source
+
+    local requested = rawKey
+    if type(rawKey) == "table" then
+        requested = rawKey.key or rawKey.departmentKey or rawKey.department or rawKey.name
+    end
+
+    if requested ~= nil and requested ~= false and requested ~= "" and requested ~= true then
+        local requestedDepartment = findDepartmentByKey(requested)
+        if not requestedDepartment or not playerCanUseDepartment(src, requestedDepartment.key) then
+            print(("[Scoreboard] Unauthorized active department '%s' from player %s"):format(tostring(requested), tostring(src)))
+            return
+        end
+        rawKey = requestedDepartment.key
+    end
+
     local ok = setPlayerActiveDepartment(src, rawKey)
     if not ok then
         print(("[Scoreboard] Invalid active department '%s' for player %s"):format(tostring(rawKey), tostring(src)))
@@ -523,6 +557,7 @@ end, false)
 AddEventHandler("playerDropped", function(_)
     local src = source
     dutySelections[src] = nil
+    activeDepartments[src] = nil
 end)
 
 local function buildPlayerList()
