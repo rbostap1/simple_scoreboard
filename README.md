@@ -1,161 +1,195 @@
 # Nova Scoreboard
 
-A lightweight FiveM scoreboard with a full visual redesign, optional Badger API integration, and department blips for each player.
+Nova Scoreboard is a lightweight FiveM scoreboard resource with a modern NUI, department-aware player cards, and optional Badger integrations for role and duty data.
 
-## Recent Updates
-- Complete scoreboard redesign with a glass-style layout, stronger typography, and modern player cards.
-- Player HUD removed from the resource.
-- Civilian is now the default fallback department.
-- Badger Police/EMS Activity support added for duty-state lookups.
+## Current Feature Set
+- Modern scoreboard UI with animated player cards and responsive layout.
+- Department badge on each player card (short label + icon token).
+- Department summary pills with live per-department counts.
+- Current player highlighting (`Config.HighlightCurrentPlayer`).
+- Server/player count display (`online / max`).
+- Optional custom logo with fallback badge when no logo is configured.
+- Optional creator join announcement message.
+- Department resolution modes:
+    - `discord_roles` via `Badger_Discord_API` roles.
+    - `badger_duty` via `Badger_PoliceEMSActivity` duty exports.
+- Optional keyword fallback matching when Badger role data is unavailable.
+- Duty-state control via:
+    - Resource exports (recommended).
+    - Net event bridge (`nova_scoreboard:setActiveDepartment`).
+    - Built-in duty chat command (Discord role mode only).
 
-## Features
-- New scoreboard visual design with a wider panel, modern cards, and responsive layout.
-- Department blips on every player card.
-- Department summary strip showing online counts by department.
-- Optional Badger API support for role-to-department mapping.
-- Safe fallback department matching if Badger is unavailable.
-- Server-side player list synchronization.
-- Optional creator join message.
-
-## Install
-1. Place the resource in your `resources/` folder.
-2. Add this to `server.cfg`:
+## Installation
+1. Place this resource in your server `resources` folder.
+2. Ensure the folder name matches what you start in `server.cfg`.
+3. Add an ensure line:
 
 ```cfg
-ensure nova_scoreboard
+ensure simple_scoreboard
 ```
 
-3. Configure `config.lua`.
-4. Restart the resource.
+4. Configure values in `config.lua`.
+5. Restart the resource/server.
 
-## Key Configuration
+## Default Controls
+- Toggle scoreboard: `F9` (remappable through GTA keybind settings).
 
-### Basic
+## Core Configuration
+
+### Basic Settings
 ```lua
 Config.ServerName = "Nova Scoreboard"
 Config.ToggleKey = "F9"
 Config.MaxPlayers = 32
+
 Config.EnableLogo = true
 Config.LogoURL = "https://example.com/yourlogo.png"
+
+Config.HighlightCurrentPlayer = true
+Config.HighlightColor = "#E56B1F"
 ```
 
-### Badger API
+### Creator Join Message (Optional)
+```lua
+Config.EnableCreatorMessage = true
+Config.CreatorIdentifier = "license:YOUR_LICENSE_HERE"
+Config.CreatorMessageSender = "^5Nova Scoreboard^0"
+Config.CreatorMessage = "^3The script creator/editor ^2NAME HERE ^3has joined the server!^0"
+```
+
+### Department + Badger Settings
 ```lua
 Config.DepartmentMode = "discord_roles" -- or "badger_duty"
+
 Config.EnableBadgerApi = true
 Config.BadgerResource = "Badger_Discord_API"
-Config.BadgerRoleExport = "GetDiscordRoles" -- set to your Badger export name
+Config.BadgerRoleExport = "GetDiscordRoles"
+
 Config.EnableDepartmentFallback = true
 Config.RequireActiveDepartment = true
+
 Config.BadgerActivityResource = "Badger_PoliceEMSActivity"
+
 Config.EnableDutyCommand = true
 Config.DutyCommandName = "NSduty"
 ```
 
-### Department Mode
-- `discord_roles`: Departments are resolved from Discord role IDs in `Config.Departments.roles`.
-- `badger_duty`: Departments are resolved from `Config.BadgerActivityResource` duty exports.
+## Department Modes
+- `discord_roles`
+    - Resolves player departments from Discord roles defined in `Config.Departments[].roles`.
+    - If `Config.RequireActiveDepartment = true`, player must be marked active/on-duty to show their matched department.
+- `badger_duty`
+    - Attempts to resolve duty department directly from `Config.BadgerActivityResource` exports.
+    - If duty export returns only boolean duty state, role mapping is used for department identity.
 
-When using `badger_duty`:
-- If the duty export returns a department key/table, that is used directly.
-- If the duty export only returns `true/false`, the scoreboard falls back to role mapping for department identity while still using duty state for active/inactive.
+## Duty Command
+When enabled, and only in `discord_roles` mode, players can select active duty department by chat command.
 
-## Duty Chat Command (Discord Roles Mode)
-When `Config.DepartmentMode = "discord_roles"`, players can use a chat command to select their active department from eligible Discord roles.
+Default command:
+- `/NSduty`
+- `/NSduty <number>`
+- `/NSduty off`
 
-Usage:
-- `/<command>` lists available departments with numbers.
-- `/<command> <number>` sets active department.
-- `/<command> off` clears active duty.
+Behavior:
+- Command with no argument lists eligible departments mapped from player Discord roles.
+- Number argument selects one of those listed departments.
+- `off`/`clear` removes active duty status.
 
-Example with default command name:
-- `/duty`
-- `/duty 2`
-- `/duty off`
-
-Notes:
-- Only departments matching the player's Discord roles are shown.
-- This command is disabled automatically when `Config.DepartmentMode` is `badger_duty`.
-
-### Departments
-Map your Discord role IDs into each department.
+## Department Definitions
+Define your departments and role mappings in `Config.Departments`.
 
 ```lua
 Config.Departments = {
-    {
-        key = "police",
-        label = "Law Enforcement",
-        shortLabel = "LEO",
-        color = "#3A86FF",
-        icon = "shield",
-        roles = { "ROLE_ID_POLICE" },
-        fallbackKeywords = { "lspd", "sasp", "bcso", "police", "sheriff", "state" }
-    },
-    {
-        key = "ems",
-        label = "Medical",
-        shortLabel = "EMS",
-        color = "#2EC27E",
-        icon = "plus",
-        roles = { "ROLE_ID_EMS" },
-        fallbackKeywords = { "ems", "medic", "doctor", "ambulance" }
-    }
+        {
+                key = "police",
+                label = "Law Enforcement",
+                shortLabel = "LEO",
+                color = "#3A86FF",
+                icon = "shield",
+                roles = { "ROLE_ID_POLICE" },
+                fallbackKeywords = { "lspd", "sasp", "bcso", "police", "sheriff", "state" }
+        },
+        {
+                key = "ems",
+                label = "Medical",
+                shortLabel = "EMS",
+                color = "#2EC27E",
+                icon = "plus",
+                roles = { "ROLE_ID_EMS" },
+                fallbackKeywords = { "ems", "medic", "doctor", "ambulance" }
+        },
+        {
+                key = "fire",
+                label = "Fire",
+                shortLabel = "FIRE",
+                color = "#F76C5E",
+                icon = "flame",
+                roles = { "ROLE_ID_FIRE" },
+                fallbackKeywords = { "fire", "fd", "firefighter" }
+        },
+        {
+                key = "civ",
+                label = "Civilian",
+                shortLabel = "CIV",
+                color = "#B8A168",
+                icon = "user",
+                roles = { "ROLE_ID_CIV" },
+                fallbackKeywords = { "civ", "civilian" }
+        }
 }
 
 Config.DefaultDepartment = {
-    key = "civ",
-    label = "Civilian",
-    shortLabel = "CIV",
-    color = "#B8A168",
-    icon = "user"
+        key = "civ",
+        label = "Civilian",
+        shortLabel = "CIV",
+        color = "#B8A168",
+        icon = "user"
 }
 ```
 
-## Badger Integration Notes
-- This resource attempts common Badger export names automatically.
-- If your Badger build uses a different export name, set `Config.BadgerRoleExport`.
-- If `Badger_Discord_API` is not started, it falls back to keyword matching (if enabled).
-- Role matching is based on the role IDs listed in each department's `roles` array.
+## Integration API
 
-## Active Department Mode
-When `Config.RequireActiveDepartment = true`, department blips are shown only for players actively set to a department.
-
-If a player is not marked active, they show as your `Config.DefaultDepartment` (by default `Civilian`).
-
-In `badger_duty` mode, the server checks `Config.BadgerActivityResource` for duty-state/department exports.
-
-Use one of these server-side integrations from your duty script:
+### Exports
+Use from another server resource:
 
 ```lua
--- Export API (preferred)
-exports["nova_scoreboard"]:SetPlayerActiveDepartment(source, "police")
-exports["nova_scoreboard"]:ClearPlayerActiveDepartment(source)
+exports["simple_scoreboard"]:SetPlayerActiveDepartment(source, "police")
+exports["simple_scoreboard"]:ClearPlayerActiveDepartment(source)
 ```
 
-Client -> server bridge option:
+### Net Event Bridge
+Use from client scripts:
 
 ```lua
--- from a client duty script
 TriggerServerEvent("nova_scoreboard:setActiveDepartment", "police")
 TriggerServerEvent("nova_scoreboard:setActiveDepartment", nil)
 ```
 
-## Department Blips
-Department data is attached to each player object from the server:
-- `player.department.key`
-- `player.department.label`
-- `player.department.shortLabel`
-- `player.department.color`
-- `player.department.icon`
+### Badger Duty Bridge Events (Auto-Handled)
+This resource listens for common Badger duty events, including:
+- `Badger_PoliceEMSActivity:OnDuty`
+- `Badger_PoliceEMSActivity:OffDuty`
+- `Badger_PoliceEMSActivity:SetOnDuty`
+- `Badger_PoliceEMSActivity:SetOffDuty`
+- and several related alias events.
 
-The NUI uses this to render:
-- Card blips in the scoreboard list.
-- Department total pills in the header strip.
+## UI Notes
+- 12 players per page in the NUI.
+- Department summary auto-updates from current server player list.
+- Supports color theming via `Config.Colors`.
+- Mobile/resolution-responsive card grid (3, 2, then 1 column based on width).
 
 ## Troubleshooting
-- No departments showing: verify Badger resource name and role IDs in `Config.Departments`.
-- Everyone shows `Civilian`: the player is not marked on duty or Badger did not return a matching role.
-- No players visible: ensure `server.lua` is included in `fxmanifest.lua`.
+- No departments are showing:
+    - Verify `Config.BadgerResource` is correct and started.
+    - Verify role IDs in `Config.Departments[].roles`.
+- Everyone appears as Civilian:
+    - Ensure player is on duty when `Config.RequireActiveDepartment = true`.
+    - Confirm Badger role/duty exports return expected data.
+- Duty command does nothing:
+    - Check `Config.EnableDutyCommand = true`.
+    - Check `Config.DepartmentMode = "discord_roles"`.
+    - Use configured command name (`Config.DutyCommandName`, default `NSduty`).
 
 ## Credits
 Created by Ryan Bostaph.
