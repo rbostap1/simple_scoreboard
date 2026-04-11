@@ -4,7 +4,7 @@ local departmentCache = {}
 local tryGetBadgerRoles
 local missingBadgerRoleExportWarned = false
 local creatorHasJoined = false
-local DEPARTMENT_CACHE_TTL_MS = 5000
+local DEPARTMENT_CACHE_TTL_MILLIS = 5000
 local DEFAULT_BADGER_ROLE_RESOURCE = "Badger_Discord_API"
 local DEFAULT_BADGER_ACTIVITY_RESOURCE = "Badger_PoliceEMSActivity"
 
@@ -245,12 +245,12 @@ tryGetBadgerRoles = function(playerSrc)
     end
 
     local declaredExports = getDeclaredServerExports(resourceName)
-    local hasDeclaredExports = next(declaredExports) ~= nil
+    local hasAnyDeclaredExports = next(declaredExports) ~= nil
     local attempted = false
 
     for _, fnName in ipairs(probes) do
         -- Fallback: if resource metadata does not declare exports, probe known names anyway.
-        if declaredExports[fnName] or not hasDeclaredExports then
+        if declaredExports[fnName] or not hasAnyDeclaredExports then
             attempted = true
             local ok, value = callExportSafely(exportsRef, fnName, playerSrc)
             if ok and type(value) == "table" then
@@ -429,6 +429,11 @@ RegisterNetEvent("nova_scoreboard:setActiveDepartment", function(rawKey)
         requested = rawKey.key or rawKey.departmentKey or rawKey.department or rawKey.name
     end
 
+    if hasDepartmentSelectionValue(requested) and requested ~= true and type(requested) ~= "string" then
+        print(("[Scoreboard] Rejected invalid active department payload type '%s' from player %s"):format(type(requested), tostring(src)))
+        return
+    end
+
     if hasDepartmentSelectionValue(requested) and requested ~= true then
         local requestedDepartment = findDepartmentByKey(requested)
         if not requestedDepartment or not playerCanUseDepartment(src, requestedDepartment.key) then
@@ -465,6 +470,11 @@ local function registerDutyBridgeEvent(eventName, isActive)
             local requested = dutyValue
             if type(requested) == "table" then
                 requested = requested.key or requested.departmentKey or requested.department or requested.name
+            end
+
+            if hasDepartmentSelectionValue(requested) and requested ~= true and type(requested) ~= "string" then
+                print(("[Scoreboard] Rejected invalid duty bridge payload type '%s' from '%s' for player %s"):format(type(requested), eventName, tostring(src)))
+                return
             end
 
             if hasDepartmentSelectionValue(requested) and requested ~= true then
@@ -632,7 +642,7 @@ local function getCachedDepartment(playerId, playerName)
     local department = resolveDepartment(playerId, playerName)
     departmentCache[playerId] = {
         department = department,
-        expiresAt = now + DEPARTMENT_CACHE_TTL_MS,
+        expiresAt = now + DEPARTMENT_CACHE_TTL_MILLIS,
         playerName = playerName
     }
 
